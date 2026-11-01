@@ -5,9 +5,9 @@ import type { Kol } from '@snk/contracts';
 import { onchainApi } from '@/services/api/onchainApi';
 import { onchainKeys } from '@/hooks/useOnchain';
 import { errorMessage } from '@/utils/format';
-import { KolTimeline } from './kol/KolTimeline';
 import { KolEditor } from './kol/KolEditor';
 import { KolWatchlist } from './kol/KolWatchlist';
+import { KolReport } from './kol/KolReport';
 import { LoadingState } from '@/components/feedback/LoadingState';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -18,6 +18,12 @@ export function KolPanel({ compact = false }: { compact?: boolean }) {
   const [selectedId, setSelectedId] = useState('');
   const [editing, setEditing] = useState<Kol | 'add' | null>(null);
   const kols = useQuery({ queryKey: onchainKeys.kols, queryFn: onchainApi.kols, retry: false });
+  const reports = useQuery({
+    queryKey: [...onchainKeys.kols, 'reports'],
+    queryFn: onchainApi.kolReports,
+    enabled: !compact,
+    retry: false,
+  });
   const accounts = kols.data?.accounts ?? [];
   const active = accounts.find((account) => account.id === selectedId) || accounts[0];
   const remove = useMutation({
@@ -44,7 +50,6 @@ export function KolPanel({ compact = false }: { compact?: boolean }) {
         <KolWatchlist
           accounts={accounts}
           compact={compact}
-          configured={Boolean(kols.data?.x.configured)}
           loaded={Boolean(kols.data)}
           error={failure ? errorMessage(failure) : null}
           selectedId={active?.id}
@@ -66,11 +71,13 @@ export function KolPanel({ compact = false }: { compact?: boolean }) {
           removePending={remove.isPending}
         />
       )}
-      {!compact && kols.data && (
-        <KolTimeline
-          key={active?.id}
+      {!compact && !kols.isPending && (
+        <KolReport
           accounts={accounts}
-          configured={kols.data.x.configured}
+          days={reports.data?.days ?? []}
+          pending={reports.isPending}
+          error={reports.error ? errorMessage(reports.error) : null}
+          configured={Boolean(kols.data?.x.configured)}
           selectedId={active?.id}
           onSelect={setSelectedId}
         />

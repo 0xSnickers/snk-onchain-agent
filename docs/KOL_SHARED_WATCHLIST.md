@@ -25,11 +25,14 @@ schema：`agent-wallet-manager/x-mint-bloggers@1`。
 
 ## 同步行为
 
-`POST /api/v1/kols/sync-shared`：
+`POST /api/v1/kols/sync-shared` 把这份 JSON 当作入库来源，不是唯一存档。
 
-- 按小写 handle 创建缺失行，或更新已有行的 category、note、`source=SHARED`
-- 不删除 JSON 里没有的手工账号
-- 不改昵称、头像、推文和 xapi 检查点
-- 不调用 xapi；推文仍按账号手动同步。未配置 `XAPI_KEY` 时页面会说明原因，而不是显示空成功
+- 当前 `Kol` 行按小写 handle 创建或更新 category、note、profileUrl（来自合法 xUrl）、projects、账号 summary、`source=SHARED`
+- 内容哈希变化时新增一份 `KolSharedReport`。`reportDate` 为 Asia/Shanghai 日历日：文件 `reportDate`/`date` 优先，否则由 `generatedAt`/`updatedAt` 换算，都没有时用入库时刻
+- 快照保留每日总结（`dailySummary` / `summary` / `digest`）、分类 `highlights` / `actions`、账号备注和 status URL。文件里没有的字段留空
+- 相同哈希不复制快照。文件后来变短或删掉某个 handle，已入库快照仍在
+- 不删除 JSON 之外的手工账号，不改昵称、头像、已采集推文和 xapi 检查点，也不调用 xapi
+
+`GET /api/v1/kols/reports` 从数据库按日期返回日报。观察页以此为主视图。实时推文在「原始推文」里，且 `XAPI_KEY` 为空时跳过，不阻断页面。
 
 文件缺失或 schema 不对时返回明确错误，不会当成空名单成功。

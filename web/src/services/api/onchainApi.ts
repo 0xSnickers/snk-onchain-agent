@@ -17,6 +17,7 @@ import type {
   KolResult,
   Kol,
   KolSharedSyncResult,
+  KolReportList,
 } from '@snk/contracts';
 async function get<T>(path: string, params?: Record<string, string>) {
   return (await httpClient.get<ApiResponse<T>>(path, { params })).data.data;
@@ -36,6 +37,7 @@ export const onchainApi = {
   syncKol: async ({ id, more = false }: { id: string; more?: boolean }) =>
     (await httpClient.post<ApiResponse<KolSyncResult>>(`/kols/${id}/sync`, { more })).data.data,
   kols: () => get<KolResult>('/kols'),
+  kolReports: () => get<KolReportList>('/kols/reports'),
   syncSharedKols: async () =>
     (await httpClient.post<ApiResponse<KolSharedSyncResult>>('/kols/sync-shared', {})).data.data,
   addKol: async (input: { handle: string; category?: KolCategory; note?: string }) =>

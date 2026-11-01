@@ -37,4 +37,5 @@ it('does not report missing credentials when the status request itself failed', 
   show();
   expect(await screen.findByRole('alert')).toHaveTextContent('Local API unavailable');
   expect(screen.queryByText('待配置 API Key')).not.toBeInTheDocument();
+  expect(screen.queryByText('日报可用 · 实时推文可选')).not.toBeInTheDocument();
 });

@@ -11,7 +11,7 @@ export class KolService {
       accounts: await this.repository.list(),
       x: {
         configured: xapiConfigured(),
-        state: xapiConfigured() ? "READY" : "NOT_CONFIGURED",
+        state: xapiConfigured() ? "READY" : "OPTIONAL",
       },
     };
   }

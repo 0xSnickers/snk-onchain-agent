@@ -10,7 +10,6 @@ type Filter = 'ALL' | KolCategory;
 export function KolWatchlist({
   accounts,
   compact = false,
-  configured,
   selectedId,
   loaded,
   error,
@@ -25,7 +24,6 @@ export function KolWatchlist({
 }: {
   accounts: Kol[];
   compact?: boolean;
-  configured: boolean;
   loaded: boolean;
   error?: string | null;
   selectedId?: string;
@@ -86,15 +84,6 @@ export function KolWatchlist({
           {error}
         </p>
       )}
-      {loaded && !compact && !configured && accounts.length === 0 && (
-        <div className="kol-xapi-missing">
-          <strong>{t('social.keyMissingTitle')}</strong>
-          <p>{t('social.keyMissing')}</p>
-        </div>
-      )}
-      {loaded && !compact && !configured && accounts.length > 0 && (
-        <p className="kol-xapi-flag">{t('social.keyMissingTitle')}</p>
-      )}
       {loaded && accounts.length === 0 && (
         <div className="empty-state">
           <Users size={22} />
@@ -153,11 +142,7 @@ export function KolWatchlist({
           })}
         </div>
       )}
-      {loaded && !compact && (
-        <p className="data-caption" title={t('social.manualHint')}>
-          xapi.to · {t('social.manualOnly')}
-        </p>
-      )}
+      {loaded && !compact && <p className="data-caption">{t('social.rosterHint')}</p>}
     </section>
   );
 }
@@ -216,6 +201,16 @@ function KolAccountRow({
         </button>
       )}
       <div className="kol-account-meta">
+        {!compact && (
+          <a
+            href={`https://x.com/${account.handle}`}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`X @${account.handle}`}
+          >
+            ↗
+          </a>
+        )}
         {account.source === 'SHARED' && (
           <span className="kol-source-badge">{t('social.sourceShared')}</span>
         )}
