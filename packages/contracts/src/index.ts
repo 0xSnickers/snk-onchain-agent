@@ -38,4 +38,5 @@ export type * from './market';
 
 export type * from './kol';
 export type * from './launch';
+export type * from './sniper';
 export * from './delegation';

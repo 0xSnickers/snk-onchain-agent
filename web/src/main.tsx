@@ -10,6 +10,7 @@ import './styles/redesign.css';
 import './styles/market.css';
 import './styles/terminal.css';
 import './styles/mini.css';
+import './styles/sniper.css';
 
 const queryClient = new QueryClient();
 

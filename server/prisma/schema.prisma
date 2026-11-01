@@ -231,6 +231,57 @@ model ExecutorSession {
   heartbeatAt DateTime?
   updatedAt DateTime @updatedAt
 }
+model SniperControl {
+  id String @id
+  armed Boolean @default(false)
+  minProgress Int @default(65)
+  minAgentWallets Int @default(115)
+  maxUsd Int @default(20)
+  dailyUsdCap Int @default(60)
+  updatedAt DateTime @updatedAt
+}
+
+model SniperTarget {
+  id String @id @default(uuid())
+  chainId String @default("56")
+  contractAddress String
+  symbol String @default("")
+  name String @default("")
+  source String
+  stage String @default("UNKNOWN")
+  kind String @default("UNKNOWN")
+  status String @default("WATCHING")
+  progress Float?
+  holders Int?
+  agentWallets Int?
+  reasons String[] @default([])
+  evidenceJson Json @default("{}")
+  imageUrl String?
+  platform String @default("")
+  url String @default("")
+  armedAt DateTime?
+  previewJson Json?
+  discoveredAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  intents SniperIntent[]
+  @@unique([chainId, contractAddress])
+  @@index([status, updatedAt])
+}
+
+model SniperIntent {
+  id String @id @default(uuid())
+  targetId String
+  target SniperTarget @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  amount String
+  asset String
+  confirmationText String
+  status String @default("RECORDED")
+  broadcast Boolean @default(false)
+  createdAt DateTime @default(now())
+  @@index([targetId, createdAt])
+  @@index([createdAt])
+}
+
 model CandidateOutbox {
   id String @id @default(uuid())
   candidateId String

@@ -8,9 +8,11 @@ import { marketMessages } from './market';
 import { designMessages } from './design';
 import { agentMessages } from './agent';
 import { onchainMessages } from './onchain';
+import { sniperMessages } from './sniper';
 for (const locale of ['zh-CN', 'en-US'] as const)
   Object.assign(resources[locale].translation, {
     onchain: onchainMessages[locale],
+    sniper: sniperMessages[locale],
     agent: agentMessages[locale],
     design: designMessages[locale],
     market: marketMessages[locale],

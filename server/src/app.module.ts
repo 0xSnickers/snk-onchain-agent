@@ -4,6 +4,7 @@ import { Controller, Get, Module } from "@nestjs/common";
 import { WalletModule } from "./modules/wallet/wallet.module";
 import { MarketModule } from "./modules/market/market.module";
 import { KolModule } from "./modules/kol/kol.module";
+import { SniperModule } from "./modules/sniper/sniper.module";
 import { PrismaService } from "./prisma/prisma.service";
 @Controller("health")
 class HealthController {
@@ -18,7 +19,7 @@ class HealthController {
   }
 }
 @Module({
-  imports: [WalletModule, MarketModule, KolModule, AgentModule, ActivityModule],
+  imports: [WalletModule, MarketModule, KolModule, AgentModule, ActivityModule, SniperModule],
   controllers: [HealthController],
   providers: [PrismaService],
 })

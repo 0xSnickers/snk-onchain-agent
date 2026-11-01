@@ -1,0 +1,53 @@
+.sniper-page {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.sniper-page > .panel,
+.sniper-workspace > .panel {
+  padding: 14px;
+  min-width: 0;
+}
+.sniper-page details {
+  margin-top: 10px;
+}
+.sniper-page summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--color-muted-foreground);
+}
+.sniper-workspace {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+}
+.sniper-list {
+  max-height: calc(100dvh - 280px);
+  min-height: 240px;
+  overflow: auto;
+}
+.sniper-reasons {
+  margin: 8px 0;
+  padding-left: 18px;
+  font-size: 12px;
+}
+.sniper-controls .agent-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (max-width: 800px) {
+  .sniper-workspace,
+  .sniper-controls .agent-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .sniper-list {
+    max-height: 320px;
+    min-height: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sniper-page summary,
+  .sniper-list .launch-token {
+    transition: none;
+  }
+}
