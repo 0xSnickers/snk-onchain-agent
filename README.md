@@ -24,7 +24,7 @@ npm run dev        # 同时启动前后端，日志写 logs/
 - Agent Wallet 会话和免费 Mint 留在 Grok Bot。本项目不扫码、不读取实时余额、不广播。成功记录由 `data/baw-free-mints.json` 经 `npm run import:baw-mints` 入库后在看板查看。
 - BNB Agent 专属发射盘：默认三列展示 Flap Agent、Four Agent ID、gang.fun 的内盘新创建/即将发射/已迁移代币；显示真实来源、采样边界、预测合约与来源失败。
 - SOL / BNB Chain 市场：GMGN 1h 活跃代币列表与真实 OHLCV，DEX Screener 名称/合约搜索；TradingView Lightweight Charts 显示蜡烛图、USD 成交量、十字线及多周期。带缓存、合并请求和限流冷却。
-- KOL 名单与 xapi.to 手动公开推文同步：稳定 userId、分页、PostgreSQL 去重、原文链接、失败状态与成功同步时间；默认不定时采集。
+- KOL 名单与 xapi.to 手动公开推文同步：稳定 userId、分页、PostgreSQL 去重、原文链接、失败状态与成功同步时间；默认不定时采集。可从 Agent Wallet Manager 的共享观察名单按 handle 增量同步四个分类，不删除手工账号，同步本身不采集推文。
 - 独立数据库与迁移、一键启动、自动化测试、真实数据库 smoke。
 
 X 关注列表导入、定时推文采集、链上历史快照和提醒属于后续阶段；不会把示例 KOL 当成你的真实关注名单。
@@ -80,4 +80,5 @@ npm run smoke          # 服务和数据库运行时：HTTP/数据库检查，�
 - 市场仅支持 `bsc`（BNB Chain）和 `solana`（SOL）。GMGN 使用本机 `gmgn-cli` 与现有 `~/.config/gmgn/.env` API Key，只执行 `market trending/kline` 白名单，不签名交易。可设置 `GMGN_CLI_PATH`。
 - DEX Screener 公共 REST API 没有公开 OHLCV 端点，负责搜索；K 线由 GMGN 提供，图表由 TradingView Lightweight Charts 渲染。榜单是供应商 1h 活跃集合，不能保证全部为 MEME，也不是安全审计。
 - xapi.to 只需在 `server/.env` 设置 `XAPI_KEY` 后重启服务；无需提供 X 登录 cookie。KOL 页选择已保存账号，点击同步最新推文或采集下一页；每账号有 60 秒冷却，可能产生供应商调用费用。当前不读取私人推文、不发帖、不导入你的个人关注列表。
+- 共享观察名单默认读取 `/home/box/.config/shared/x-mint-bloggers.json`（可用 `KOL_SHARED_WATCHLIST_PATH` 覆盖）。Agent Wallet Manager 负责写这份 JSON；本应用只在 KOL 页点击「从共享名单同步」时 upsert 账号。见 [docs/KOL_SHARED_WATCHLIST.md](docs/KOL_SHARED_WATCHLIST.md)。
 - 金额、价格、代币数量和百分比统一显示 6 位小数；数量悬浮可看精确源值，表单与广播参数不受显示舍入影响。原始技术日志不重写。

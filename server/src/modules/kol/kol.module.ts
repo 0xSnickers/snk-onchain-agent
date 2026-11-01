@@ -1,5 +1,6 @@
 import { NetworkService } from "../../common/network.service";
 import { KolSyncService } from "./kol-sync.service";
+import { KolSharedSyncService } from "./kol-shared-sync.service";
 import { XapiProvider } from "./xapi.provider";
 import { Module } from "@nestjs/common";
 import { KolController } from "./kol.controller";
@@ -13,6 +14,7 @@ import { PrismaService } from "../../prisma/prisma.service";
     KolRepository,
     PrismaService,
     KolSyncService,
+    KolSharedSyncService,
     XapiProvider,
     NetworkService,
   ],

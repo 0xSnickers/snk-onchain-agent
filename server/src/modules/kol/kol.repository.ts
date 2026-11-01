@@ -3,12 +3,16 @@ import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../prisma/prisma.service";
 import { AppError } from "../../common/http";
 import { CreateKol, UpdateKol } from "./kol.dto";
+import type { SharedKolWrite } from "./shared-watchlist";
 const publicFields = {
   id: true,
   handle: true,
   displayName: true,
   avatarUrl: true,
   category: true,
+  source: true,
+  lastSyncedAt: true,
+  syncError: true,
   note: true,
   createdAt: true,
 } as const;
@@ -30,6 +34,32 @@ export class KolRepository {
       orderBy: { createdAt: "desc" },
       select: publicFields,
     });
+  }
+  listSyncState() {
+    return this.prisma.kol.findMany({
+      select: { handle: true, category: true, note: true, source: true },
+    });
+  }
+  applyShared(writes: SharedKolWrite[]) {
+    if (!writes.length) return Promise.resolve();
+    return this.prisma.$transaction(
+      writes.map((row) =>
+        this.prisma.kol.upsert({
+          where: { handle: row.handle },
+          create: {
+            handle: row.handle,
+            category: row.category,
+            note: row.note,
+            source: "SHARED",
+          },
+          update: {
+            category: row.category,
+            note: row.note,
+            source: "SHARED",
+          },
+        }),
+      ),
+    );
   }
   add(input: CreateKol) {
     return this.prisma.kol.upsert({

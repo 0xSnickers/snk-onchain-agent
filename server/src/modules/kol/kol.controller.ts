@@ -10,6 +10,7 @@ import {
 } from "@nestjs/common";
 import { IsBoolean, IsOptional } from "class-validator";
 import { KolSyncService } from "./kol-sync.service";
+import { KolSharedSyncService } from "./kol-shared-sync.service";
 class SyncKolInput {
   @IsOptional() @IsBoolean() more = false;
 }
@@ -20,12 +21,17 @@ export class KolController {
   constructor(
     private readonly kol: KolService,
     private readonly syncService: KolSyncService,
+    private readonly shared: KolSharedSyncService,
   ) {}
   @Get() list() {
     return this.kol.list();
   }
   @Post() add(@Body() input: CreateKol) {
     return this.kol.add(input);
+  }
+  @Post("sync-shared")
+  syncShared() {
+    return this.shared.sync();
   }
   @Patch(":id") update(
     @Param("id", new ParseUUIDPipe()) id: string,
