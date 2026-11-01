@@ -1,0 +1,1 @@
+ALTER TABLE "Kol" ADD COLUMN "avatarUrl" TEXT;

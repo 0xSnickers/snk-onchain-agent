@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+model Kol {
+  id String @id @default(uuid())
+  handle String @unique
+  displayName String?
+  avatarUrl String?
+  category String @default("DAILY")
+  xUserId String?
+  lastSyncedAt DateTime?
+  syncError String?
+  nextCursor String?
+  posts KolPost[]
+  note String @default("")
+  createdAt DateTime @default(now())
+}
+
+model MintCandidate {
+  id String @id @default(uuid())
+  chainId String @default("56")
+  contractAddress String
+  symbol String?
+  name String?
+  class String @default("UNKNOWN")
+  status String @default("DISCOVERED")
+  source String @default("MANUAL")
+  inputData String @default("0x")
+  autoExecute Boolean @default(false)
+  lastRunId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  runs AgentRun[]
+  briefs ResearchBrief[]
+  @@unique([chainId, contractAddress])
+  @@index([status, updatedAt])
+}
+model AgentRun {
+  id String @id @default(uuid())
+  kind String
+  status String @default("RUNNING")
+  trigger String @default("USER")
+  summary String @default("")
+  errorCode String?
+  errorMessage String?
+  candidateId String?
+  candidate MintCandidate? @relation(fields: [candidateId], references: [id])
+  contextJson Json @default("{}")
+  walletScope String?
+  actionSeq Int @default(0)
+  expiresAt DateTime?
+  startedAt DateTime @default(now())
+  finishedAt DateTime?
+  actions AgentAction[]
+  briefs ResearchBrief[]
+  confirmations UserSpendConfirm[]
+  @@index([startedAt, id])
+  @@index([status])
+  @@index([walletScope, startedAt])
+}
+model AgentAction {
+  id String @id @default(uuid())
+  runId String
+  run AgentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  seq Int
+  name String
+  decision String
+  requestId String?
+  txHash String?
+  riskSummary String @default("")
+  detailJson Json @default("{}")
+  durationMs Int?
+  createdAt DateTime @default(now())
+  @@unique([runId, seq])
+  @@index([txHash])
+}
+model ResearchBrief {
+  id String @id @default(uuid())
+  runId String
+  run AgentRun @relation(fields: [runId], references: [id])
+  candidateId String
+  candidate MintCandidate @relation(fields: [candidateId], references: [id])
+  chainId String
+  contractAddress String
+  symbol String?
+  riskLevel String?
+  liquidityUsd Decimal? @db.Decimal(38,18)
+  top10Percent Decimal? @db.Decimal(10,4)
+  auditAvailable Boolean @default(false)
+  dynamicAvailable Boolean @default(false)
+  bodyMd String
+  evidenceJson Json @default("{}")
+  createdAt DateTime @default(now())
+  confirmations UserSpendConfirm[]
+  @@index([chainId, contractAddress, createdAt])
+}
+model UserSpendConfirm {
+  id String @id @default(uuid())
+  runId String @unique
+  run AgentRun @relation(fields: [runId], references: [id])
+  briefId String
+  brief ResearchBrief @relation(fields: [briefId], references: [id])
+  chainId String
+  contractAddress String
+  amount String
+  asset String
+  fromToken String
+  walletAddress String
+  slippage String @default("auto")
+  confirmationText String
+  quoteJson Json
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  consumedAt DateTime?
+}
+model AgentNotification {
+  id String @id @default(uuid())
+  runId String
+  message String
+  createdAt DateTime @default(now())
+  readAt DateTime?
+  @@index([createdAt])
+}
+model AgentLease {
+  key String @id
+  owner String
+  expiresAt DateTime
+}
+
+model WalletActivity {
+  id String @id @default(uuid())
+  walletScope String
+  walletAddress String
+  chainId String
+  txHash String
+  type String
+  providerType String
+  status String
+  txTime DateTime?
+  movements Json @default("[]")
+  networkFee Json @default("{}")
+  source String @default("BINANCE_AGENTIC_WALLET")
+  fetchedAt DateTime @default(now())
+  @@unique([walletScope, chainId, txHash])
+  @@index([walletScope, txTime, id])
+}
+
+model KolPost {
+  id String @id @default(uuid())
+  kolId String
+  kol Kol @relation(fields: [kolId], references: [id], onDelete: Cascade)
+  postId String
+  text String
+  authorId String
+  authorHandle String
+  postedAt DateTime?
+  likes Int?
+  reposts Int?
+  replies Int?
+  fetchedAt DateTime @default(now())
+  @@unique([kolId, postId])
+  @@index([kolId, postedAt])
+}
+
+model ExecutorSession {
+  id String @id
+  sourceRoles String[] @default([])
+  agentId String?
+  label String @default("")
+  role String @default("MONITOR")
+  isDefault Boolean @default(false)
+  walletScope String @unique
+  state String @default("UNCONNECTED")
+  paused Boolean @default(false)
+  heartbeatAt DateTime?
+  updatedAt DateTime @updatedAt
+}
+model CandidateOutbox {
+  id String @id @default(uuid())
+  candidateId String
+  kind String
+  provider String
+  walletScope String
+  executorId String
+  status String @default("PENDING")
+  payload Json
+  confirmation Json?
+  claimToken String? @unique
+  claimedAt DateTime?
+  expiresAt DateTime
+  txHash String?
+  runId String? @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([candidateId, kind, walletScope])
+  @@index([executorId, status, createdAt])
+}

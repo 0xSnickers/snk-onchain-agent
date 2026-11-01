@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: snk
+      POSTGRES_PASSWORD: snk_local_dev
+      POSTGRES_DB: snk_onchain
+    ports: ["127.0.0.1:55432:5432"]
+    volumes: ["snk_pg:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U snk -d snk_onchain"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+volumes:
+  snk_pg:

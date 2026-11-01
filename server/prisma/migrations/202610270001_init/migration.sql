@@ -1,0 +1,6 @@
+CREATE TABLE "Kol" (
+ "id" TEXT NOT NULL, "handle" TEXT NOT NULL, "note" TEXT NOT NULL DEFAULT '',
+ "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT "Kol_pkey" PRIMARY KEY ("id")
+);
+CREATE UNIQUE INDEX "Kol_handle_key" ON "Kol"("handle");

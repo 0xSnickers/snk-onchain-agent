@@ -1,0 +1,627 @@
+/* Shared MINI density. Preserve readable data and full execution confirmations. */
+.app-shell {
+  grid-template-columns: 150px minmax(0, 1fr);
+}
+.sidebar {
+  padding: 16px 9px 12px;
+}
+.brand {
+  font-size: 18px;
+  gap: 7px;
+  padding: 0 4px;
+}
+.brand-mark {
+  width: 25px;
+  height: 25px;
+  border-radius: 6px;
+}
+.brand-sub {
+  font-size: 6px;
+}
+.sidebar nav {
+  margin-top: 20px;
+  gap: 3px;
+}
+.nav-item {
+  font-size: 11px;
+  padding: 10px 9px;
+  gap: 8px;
+}
+.nav-item svg {
+  width: 14px;
+  height: 14px;
+}
+.topbar {
+  min-height: 46px;
+  padding: 7px 16px;
+}
+.workspace-avatar {
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+}
+.workspace-profile strong {
+  font-size: 11px;
+}
+.topbar-current {
+  font-size: 12px;
+  padding-left: 8px;
+}
+.wallet-total .balance-total {
+  font-size: 20px;
+}
+.desk-metric {
+  padding: 6px 8px;
+}
+.desk-metric strong {
+  font-size: 16px;
+}
+.asset-row {
+  padding: 6px 8px;
+}
+.topbar-actions {
+  gap: 6px;
+}
+.header-link {
+  min-height: 28px;
+  padding: 6px 8px;
+  font-size: 10px;
+}
+.main-area main {
+  padding: 12px 16px;
+}
+.page-heading {
+  margin-bottom: 12px;
+  min-height: 26px;
+}
+.page-heading h1 {
+  font-size: 18px;
+}
+.panel {
+  padding: 12px;
+  border-radius: 8px;
+}
+.section-heading h2,
+.panel-title h2 {
+  font-size: 14px;
+}
+.section-heading {
+  margin-bottom: 10px;
+}
+.eyebrow {
+  font-size: 8px;
+}
+.badge {
+  font-size: 9px;
+  padding: 3px 6px;
+}
+.muted,
+.data-caption {
+  line-height: 1.6;
+}
+.small,
+.data-caption {
+  font-size: 10px;
+}
+.icon-button {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 5px;
+  border-radius: 6px;
+}
+input,
+select,
+textarea {
+  font-size: 11px;
+}
+.kol-workspace {
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 12px;
+}
+.kol-watchlist,
+.kol-timeline {
+  padding: 12px;
+}
+.kol-account-select {
+  padding: 9px 8px;
+  gap: 3px;
+}
+.kol-account-select strong {
+  font-size: 12px;
+}
+.kol-account-select small {
+  font-size: 9px;
+}
+.kol-timeline .section-heading h3 {
+  font-size: 14px;
+}
+.kol-timeline .agent-toolbar {
+  margin-top: 7px;
+  gap: 6px;
+}
+.kol-post {
+  padding: 13px 2px;
+}
+.post-text {
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 9px 0;
+}
+.post-content:not([open]) .post-text {
+  -webkit-line-clamp: 3;
+}
+.is-terminal {
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 12px;
+}
+.market-panel,
+.market-chart {
+  padding: 12px;
+}
+.market-panel .section-heading h2 {
+  font-size: 13px;
+}
+.market-panel .section-heading {
+  margin-bottom: 8px;
+}
+.market-panel .search-form {
+  gap: 6px;
+  margin-bottom: 8px;
+  grid-template-columns: minmax(0, 1fr) 28px;
+}
+.market-panel .search-input {
+  padding: 0 8px;
+  gap: 6px;
+}
+.market-panel input {
+  padding: 7px 0;
+  font-size: 10px;
+}
+.chain-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding-left: 8px;
+  min-width: 0;
+}
+.chain-select select {
+  border: 0;
+  background: transparent;
+  padding: 6px 4px;
+  min-width: 0;
+  flex: 1;
+  font-size: 10px;
+}
+.chain-icon {
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 3px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.market-token-row {
+  padding: 1px 0;
+  border-bottom: 0;
+}
+.token-select {
+  padding: 7px 6px;
+  gap: 7px;
+  border-radius: 5px;
+  min-height: 38px;
+}
+.token-identity {
+  gap: 0;
+}
+.token-identity strong {
+  font-size: 11px;
+}
+.token-numbers {
+  font-size: 10px;
+  gap: 2px;
+}
+.token-numbers small {
+  font-size: 9px;
+}
+.market-chart h2 {
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.chart-contract {
+  font-size: 9px;
+  margin-bottom: 4px;
+}
+.chart-periods {
+  gap: 2px;
+  margin: 4px 0 7px;
+}
+.chart-periods button {
+  font-size: 10px;
+  padding: 5px 9px;
+}
+.candle-legend {
+  font-size: 9px;
+  min-height: 16px;
+  margin-bottom: 3px;
+}
+.market-footnote {
+  font-size: 9px;
+  gap: 7px;
+  margin-top: 8px;
+}
+.chart-footer {
+  margin-top: 2px;
+}
+.balance-total {
+  font-size: 28px;
+}
+.balance-visual {
+  height: 156px;
+  min-height: 156px;
+  padding: 16px;
+}
+.history-placeholder {
+  height: auto;
+  min-height: 0;
+  padding: 12px 0 4px;
+}
+.history-placeholder small {
+  display: none;
+}
+.holding-card,
+.holdings-grid .holding-card {
+  min-height: 156px;
+  padding: 12px;
+}
+.holding-label {
+  margin-bottom: 12px;
+}
+.holding-value {
+  font-size: 20px;
+}
+.holding-card .metric-value {
+  font-size: 24px;
+}
+.balance-row,
+.address-row {
+  padding: 9px 0;
+  font-size: 11px;
+}
+.wallet-panel > .panel-title {
+  margin-bottom: 8px;
+}
+.wallet-panel > p.muted {
+  font-size: 11px;
+}
+.wallet-connect {
+  padding: 16px 0;
+}
+.login-state {
+  padding: 10px;
+  font-size: 11px;
+}
+.dashboard-lower {
+  margin-top: 14px;
+  gap: 12px;
+}
+.dashboard-aside {
+  gap: 12px;
+}
+.portfolio-overview {
+  gap: 14px;
+}
+.agent-config {
+  padding: 10px 12px;
+}
+.agent-tabs {
+  margin: 10px 0;
+  gap: 5px;
+}
+.agent-tabs button {
+  padding: 7px 10px;
+  font-size: 10px;
+}
+.agent-toolbar {
+  gap: 6px;
+}
+.activity-card {
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 7px;
+}
+.activity-meta {
+  font-size: 10px;
+  gap: 7px;
+}
+.agent-form label,
+.kol-form label {
+  font-size: 10px;
+}
+.agent-form,
+.kol-form {
+  gap: 10px;
+}
+.connections-grid {
+  gap: 12px;
+}
+.connections-grid .panel h2 {
+  font-size: 14px;
+}
+.connections-grid .panel p {
+  font-size: 11px;
+}
+@media (max-width: 800px) {
+  .sidebar {
+    padding: 12px 12px 6px;
+  }
+  .sidebar nav {
+    margin-top: 10px;
+  }
+  .nav-item {
+    min-height: 36px;
+    font-size: 10px;
+  }
+  .topbar {
+    padding: 8px 12px;
+    min-height: 46px;
+  }
+  .main-area main {
+    padding: 12px;
+  }
+  .page-heading h1 {
+    font-size: 18px;
+  }
+  .is-terminal,
+  .kol-workspace {
+    grid-template-columns: 1fr;
+  }
+  .is-terminal > .market-chart {
+    height: 440px;
+    min-height: 440px;
+  }
+  .kol-watchlist .kol-row {
+    min-width: 130px;
+    flex-basis: 130px;
+  }
+  .token-select {
+    min-height: 40px;
+    padding: 8px;
+  }
+  .chart-periods button {
+    min-height: 36px;
+  }
+  .holding-card,
+  .holdings-grid .holding-card {
+    min-height: 145px !important;
+  }
+  .balance-visual {
+    height: 156px !important;
+    min-height: 156px !important;
+  }
+}
+.kol-watchlist > .section-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.kol-watchlist > .section-heading h2 {
+  flex: 1;
+  font-size: 13px;
+}
+.kol-add {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+}
+.kol-row-actions {
+  display: flex;
+  opacity: 0.25;
+  flex-shrink: 0;
+}
+.kol-row-actions .icon-button {
+  width: 22px;
+  min-width: 22px;
+  height: 24px;
+  padding: 4px;
+}
+.kol-row:hover .kol-row-actions,
+.kol-row:focus-within .kol-row-actions {
+  opacity: 1;
+}
+.kol-group-heading {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--color-muted-foreground);
+  padding: 10px 8px 4px;
+}
+.kol-editor {
+  display: grid;
+  gap: 9px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.kol-editor label {
+  display: grid;
+  gap: 5px;
+  font-size: 10px;
+}
+.kol-editor input,
+.kol-editor select {
+  width: 100%;
+  min-width: 0;
+  padding: 7px;
+  font-size: 11px;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  background: var(--color-background);
+}
+.kol-editor-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  font-size: 10px;
+}
+@media (max-width: 800px) {
+  .kol-account-list {
+    display: flex;
+  }
+  .kol-group {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 5px;
+    align-items: center;
+  }
+  .kol-group-heading {
+    white-space: nowrap;
+    gap: 4px;
+  }
+  .kol-row-actions {
+    opacity: 1;
+  }
+}
+.kol-watchlist {
+  min-width: 0;
+}
+.kol-dialog {
+  max-width: 360px;
+  width: calc(100vw - 32px);
+  padding: 18px;
+  gap: 12px;
+  border-radius: 10px;
+  max-height: calc(100dvh - 40px);
+  overflow: auto;
+}
+.kol-dialog h2 {
+  font-size: 15px;
+}
+.kol-dialog .kol-editor {
+  padding: 0;
+  border-bottom: 0;
+  gap: 12px;
+}
+.kol-dialog input,
+.kol-dialog select {
+  min-height: 34px;
+}
+.kol-account-select {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.kol-account-label {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+.remote-image {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  color: var(--color-primary);
+  font-size: 9px;
+  line-height: 1;
+}
+.remote-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.kol-timeline-identity {
+  min-width: 0;
+  flex: 1;
+}
+.loading-state {
+  width: 100%;
+  padding: 12px 0;
+}
+.loading-page {
+  padding: 24px 4px;
+  min-height: 220px;
+}
+.loading-chart {
+  flex: 1;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.loading-caption {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--color-muted-foreground);
+  margin-bottom: 12px;
+}
+.loading-skeleton {
+  display: grid;
+  gap: 10px;
+}
+.loading-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.loading-row i,
+.loading-row span,
+.loading-row b {
+  height: 10px;
+  background: var(--color-border);
+  border-radius: 4px;
+  animation: loading-pulse 1.4s ease-in-out infinite;
+}
+.loading-row i {
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+}
+.loading-row span {
+  width: 44%;
+}
+.loading-row b {
+  width: 18%;
+  margin-left: auto;
+}
+.loading-row:nth-child(2) span {
+  width: 34%;
+}
+@keyframes loading-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-state .spin,
+  .loading-row i,
+  .loading-row span,
+  .loading-row b {
+    animation: none;
+  }
+}
+.kol-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+.kol-pagination span {
+  color: var(--color-muted-foreground);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.kol-timeline {
+  scroll-margin-top: 12px;
+}
