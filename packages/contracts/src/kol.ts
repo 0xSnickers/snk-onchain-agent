@@ -1,4 +1,11 @@
-export type KolCategory = 'DAILY' | 'MEME' | 'AIRDROP';
+export type KolCategory = 'DAILY' | 'MEME' | 'AIRDROP' | 'AGENT_WALLET_MINT';
+export type KolSource = 'MANUAL' | 'SHARED';
+export interface KolSharedSyncResult {
+  created: number;
+  updated: number;
+  skipped: number;
+  categories: Record<KolCategory, number>;
+}
 export interface KolPost {
   id:string; kolId:string; postId:string; text:string; authorId:string; authorHandle:string;
   postedAt:string|null; likes:number|null; reposts:number|null; replies:number|null; fetchedAt:string;

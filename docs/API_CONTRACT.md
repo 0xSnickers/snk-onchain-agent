@@ -102,7 +102,24 @@ xapi.to Action 网关认证使用官方 CLI 对应的 `XAPI-Key` 头。网关可
 
 ### KOL 分类与编辑
 
-`Kol` 新增category=DAILY/MEME/AIRDROP，默认DAILY，分别展示为日常关注/MEME/撸空投。POST /kols支持category；PATCH /kols/:id接收 `{handle,category}`，返回公开Kol字段。重复handle返回KOL_ALREADY_EXISTS（409）。修改分类保留昵称和推文；更换handle时清除旧身份和该条目的推文缓存，等待重新同步。UI保存前显示该行为提示。编辑与同步落库使用同一行锁，旧handle的在途同步返回KOL_CHANGED（409），不会把旧账号推文写到新账号。研究备注入口及展示移除；legacy note字段仅为兼容保留，不用于分类。
+`Kol` 的 category 为 DAILY/MEME/AIRDROP/AGENT_WALLET_MINT，默认 DAILY，分别展示为日常关注/MEME/撸空投/Agent Wallet 打新。POST /kols 支持 category；PATCH /kols/:id 接收 `{handle,category}`，返回公开 Kol 字段。重复 handle 返回 KOL_ALREADY_EXISTS（409）。修改分类保留昵称和推文；更换 handle 时清除旧身份和该条目的推文缓存，等待重新同步。UI 保存前显示该行为提示。编辑与同步落库使用同一行锁，旧 handle 的在途同步返回 KOL_CHANGED（409），不会把旧账号推文写到新账号。研究备注入口及展示移除；legacy note 字段仅为兼容保留，不用于分类。
+
+`GET /kols` 的每条 Kol 还包含 `source`（`MANUAL` 或 `SHARED`）、`lastSyncedAt`（无成功同步时为 null）和 `syncError`（最近一次推文同步错误，无则为 null）。`source=SHARED` 表示该 handle 来自共享观察名单；手工添加且未被同 handle 覆盖的账号保持 `MANUAL`。
+
+### 共享观察名单
+
+`POST /kols/sync-shared` 无业务 body。读取 `KOL_SHARED_WATCHLIST_PATH`，未设置时默认 `/home/box/.config/shared/x-mint-bloggers.json`。文件 schema 必须为 `agent-wallet-manager/x-mint-bloggers@1`。分类优先用文件内 `snkKolHint.categoryMap` 的合法值，否则使用：
+
+| 文件分类 | 应用分类 |
+|---|---|
+| daily | DAILY |
+| meme | MEME |
+| airdrop | AIRDROP |
+| agent_wallet_mint | AGENT_WALLET_MINT |
+
+账号对象为 `{ handle, xUrl, notes, projects[] }`。handle 可带或不带 `@`，入库为小写且不含 `@`。按 handle 大小写不敏感 upsert：缺失则创建，已存在则更新 category、note 和 `source=SHARED`。不删除文件里没有的账号，不改昵称、头像、推文或 xapi 检查点，也不调用 xapi。`projects` 不入库。Agent Wallet Manager 拥有该 JSON 的写入；本接口只读。
+
+成功 201，data 为 `{ created, updated, skipped, categories }`。`categories` 是四个应用分类下、文件中有效且唯一的账号数。`skipped` 包含非法 handle、与 xUrl 冲突、未知分类、文件内重复项，以及分类/备注/来源已一致的行。文件缺失、不是普通文件或不可读：409 `SHARED_WATCHLIST_UNAVAILABLE`。JSON 非法、schema 不符或超过 500 条：409 `SHARED_WATCHLIST_INVALID`。不以空名单伪装成功。推文采集仍是按账号的手动同步。
 
 ### 头像与代币图片
 

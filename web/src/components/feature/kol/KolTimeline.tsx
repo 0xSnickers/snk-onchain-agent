@@ -78,7 +78,12 @@ export function KolTimeline({
           </select>
         )}
       </div>
-      {!configured && <p className="wallet-notice">{t('social.keyMissing')}</p>}
+      {!configured && (
+        <div className="kol-xapi-missing">
+          <strong>{t('social.keyMissingTitle')}</strong>
+          <p>{t('social.keyMissing')}</p>
+        </div>
+      )}
       <div className="agent-toolbar">
         <Button
           variant="outline"

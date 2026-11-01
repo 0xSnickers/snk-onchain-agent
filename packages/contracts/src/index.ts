@@ -24,7 +24,11 @@ export interface MarketPair {
   imageUrl?: string | null; quote: string; priceUsd: string | null; volume24h: number | null; liquidityUsd: number | null; change24h: number | null; url: string;
 }
 export interface MarketResult { source: string; fetchedAt: string; query: string; chain: string; pairs: MarketPair[] }
-export interface Kol { id: string; handle: string; displayName?: string | null; avatarUrl?: string | null; category?: import('./kol').KolCategory; note: string; createdAt: string }
+export interface Kol {
+  id: string; handle: string; displayName?: string | null; avatarUrl?: string | null;
+  category?: import('./kol').KolCategory; source?: import('./kol').KolSource;
+  lastSyncedAt?: string | null; syncError?: string | null; note: string; createdAt: string;
+}
 export interface KolResult { accounts: Kol[]; x: { configured: boolean; state: string } }
 
 export type * from './agent-run';

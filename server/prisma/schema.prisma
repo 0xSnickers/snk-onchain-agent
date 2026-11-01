@@ -11,6 +11,7 @@ model Kol {
   displayName String?
   avatarUrl String?
   category String @default("DAILY")
+  source String @default("MANUAL")
   xUserId String?
   lastSyncedAt DateTime?
   syncError String?

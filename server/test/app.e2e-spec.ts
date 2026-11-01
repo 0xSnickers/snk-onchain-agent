@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { Test } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
@@ -12,6 +13,7 @@ describe("Local API contract", () => {
   const id = "8277dd94-6876-4044-a962-e4ac9592a575";
   const prisma = {
     $queryRaw: jest.fn().mockResolvedValue([1]),
+    $transaction: jest.fn(async (ops: Promise<unknown>[]) => Promise.all(ops)),
     kol: {
       findMany: jest.fn().mockResolvedValue([]),
       upsert: jest.fn().mockResolvedValue({ id, handle: "example", note: "" }),
@@ -166,5 +168,79 @@ describe("Local API contract", () => {
           .send({ handle: "example", category: "MEME" })
       ).status,
     ).toBe(400);
+  });
+  it("accepts AGENT_WALLET_MINT on the watchlist", async () => {
+    const response = await call()
+      .post("/api/v1/kols")
+      .send({ handle: "mintwatch", category: "AGENT_WALLET_MINT" });
+    expect(response.status).toBe(201);
+    expect(prisma.kol.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        create: expect.objectContaining({
+          handle: "mintwatch",
+          category: "AGENT_WALLET_MINT",
+        }),
+      }),
+    );
+  });
+  it("imports the shared watchlist and reports a missing file", async () => {
+    const previous = process.env.KOL_SHARED_WATCHLIST_PATH;
+    prisma.kol.upsert.mockClear();
+    prisma.kol.findMany.mockResolvedValueOnce([
+      {
+        handle: "daily_one",
+        category: "MEME",
+        note: "old",
+        source: "MANUAL",
+      },
+      {
+        handle: "meme_one",
+        category: "MEME",
+        note: "",
+        source: "SHARED",
+      },
+      {
+        handle: "kept_manual",
+        category: "DAILY",
+        note: "mine",
+        source: "MANUAL",
+      },
+    ]);
+    process.env.KOL_SHARED_WATCHLIST_PATH = join(
+      __dirname,
+      "fixtures/x-mint-bloggers.json",
+    );
+    try {
+      const response = await call().post("/api/v1/kols/sync-shared").send({});
+      expect(response.status).toBe(201);
+      expect(response.body.data).toMatchObject({
+        created: 3,
+        updated: 1,
+        skipped: 5,
+        categories: { DAILY: 1, MEME: 1, AIRDROP: 1, AGENT_WALLET_MINT: 2 },
+      });
+      const writes = prisma.kol.upsert.mock.calls.map(
+        (args: [{ where: { handle: string }; update: object }]) => args[0],
+      );
+      expect(writes.map((row) => row.where.handle)).toEqual([
+        "daily_one",
+        "drop_one",
+        "mint_one",
+        "mint_two",
+      ]);
+      expect(writes[0]?.update).toEqual({
+        category: "DAILY",
+        note: "fixture daily updated",
+        source: "SHARED",
+      });
+      process.env.KOL_SHARED_WATCHLIST_PATH =
+        "/tmp/snk-missing-shared-watchlist.json";
+      const missing = await call().post("/api/v1/kols/sync-shared").send({});
+      expect(missing.status).toBe(409);
+      expect(missing.body.code).toBe("SHARED_WATCHLIST_UNAVAILABLE");
+    } finally {
+      if (previous === undefined) delete process.env.KOL_SHARED_WATCHLIST_PATH;
+      else process.env.KOL_SHARED_WATCHLIST_PATH = previous;
+    }
   });
 });

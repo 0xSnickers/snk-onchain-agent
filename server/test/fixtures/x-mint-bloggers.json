@@ -1,0 +1,92 @@
+{
+  "schema": "agent-wallet-manager/x-mint-bloggers@1",
+  "snkKolHint": {
+    "categoryMap": {
+      "daily": "DAILY",
+      "meme": "MEME",
+      "airdrop": "AIRDROP",
+      "agent_wallet_mint": "AGENT_WALLET_MINT"
+    }
+  },
+  "categories": {
+    "daily": {
+      "label": "日常关注",
+      "accounts": [
+        {
+          "handle": "daily_one",
+          "xUrl": "https://x.com/daily_one",
+          "notes": "fixture daily",
+          "projects": ["alpha"]
+        },
+        {
+          "handle": "Daily_One",
+          "xUrl": "https://x.com/daily_one",
+          "notes": "fixture daily updated",
+          "projects": []
+        },
+        {
+          "handle": "has space",
+          "xUrl": "https://x.com/not_used",
+          "notes": "",
+          "projects": []
+        },
+        {
+          "handle": "url_mismatch",
+          "xUrl": "https://x.com/other_name",
+          "notes": "conflict",
+          "projects": []
+        }
+      ]
+    },
+    "meme": {
+      "label": "MEME",
+      "accounts": [
+        {
+          "handle": "@meme_one",
+          "xUrl": "https://x.com/meme_one",
+          "notes": "",
+          "projects": []
+        }
+      ]
+    },
+    "airdrop": {
+      "label": "撸空投",
+      "accounts": [
+        {
+          "handle": "drop_one",
+          "xUrl": "https://x.com/drop_one",
+          "notes": "drop",
+          "projects": ["quest"]
+        }
+      ]
+    },
+    "agent_wallet_mint": {
+      "label": "Agent Wallet 打新",
+      "accounts": [
+        {
+          "handle": "mint_one",
+          "xUrl": "https://x.com/mint_one",
+          "notes": "mint",
+          "projects": []
+        },
+        {
+          "handle": "mint_two",
+          "xUrl": "https://x.com/mint_two",
+          "notes": "",
+          "projects": ["wallet"]
+        }
+      ]
+    },
+    "noise": {
+      "label": "unknown",
+      "accounts": [
+        {
+          "handle": "nope_one",
+          "xUrl": "https://x.com/nope_one",
+          "notes": "",
+          "projects": []
+        }
+      ]
+    }
+  }
+}

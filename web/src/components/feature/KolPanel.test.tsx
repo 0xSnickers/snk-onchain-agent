@@ -12,6 +12,7 @@ vi.mock('@/services/api/onchainApi', () => ({
     removeKol: vi.fn(),
     kolPosts: vi.fn(),
     syncKol: vi.fn(),
+    syncSharedKols: vi.fn(),
     updateKol: vi.fn(),
   },
 }));
@@ -125,6 +126,8 @@ it('edits account category without a research-note field', async () => {
   });
   renderPanel();
   await userEvent.click(await screen.findByRole('button', { name: '编辑账号 @example' }));
+  expect(screen.getAllByRole('option')).toHaveLength(4);
+  expect(screen.getByRole('option', { name: 'Agent Wallet 打新' })).toBeInTheDocument();
   expect(screen.queryByLabelText('研究备注（可选）')).not.toBeInTheDocument();
   await userEvent.selectOptions(screen.getByLabelText('分类'), 'MEME');
   await userEvent.click(screen.getByRole('button', { name: '保存' }));
@@ -200,4 +203,67 @@ it('paginates cached posts by ten and resets on account switch', async () => {
   expect(await screen.findByText('second tweet 1')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: '上一页' })).toBeDisabled();
   expect(onchainApi.syncKol).not.toHaveBeenCalled();
+});
+it('shows four watch groups, shared source, and syncs the shared list', async () => {
+  vi.mocked(onchainApi.kols).mockResolvedValue({
+    accounts: [
+      {
+        id: 'daily',
+        handle: 'daily_one',
+        category: 'DAILY',
+        source: 'SHARED',
+        note: '',
+        createdAt: '',
+        lastSyncedAt: null,
+        syncError: null,
+      },
+      {
+        id: 'meme',
+        handle: 'meme_one',
+        category: 'MEME',
+        source: 'MANUAL',
+        note: '',
+        createdAt: '',
+        lastSyncedAt: '2026-11-01T00:00:00.000Z',
+      },
+      {
+        id: 'drop',
+        handle: 'drop_one',
+        category: 'AIRDROP',
+        source: 'SHARED',
+        note: '',
+        createdAt: '',
+        syncError: 'upstream',
+      },
+      {
+        id: 'mint',
+        handle: 'mint_one',
+        category: 'AGENT_WALLET_MINT',
+        source: 'SHARED',
+        note: '',
+        createdAt: '',
+      },
+    ],
+    x: { configured: false, state: 'NOT_CONFIGURED' },
+  });
+  vi.mocked(onchainApi.syncSharedKols).mockResolvedValue({
+    created: 4,
+    updated: 1,
+    skipped: 2,
+    categories: { DAILY: 1, MEME: 1, AIRDROP: 1, AGENT_WALLET_MINT: 1 },
+  });
+  renderPanel();
+  expect(await screen.findByRole('heading', { name: /Agent Wallet 打新/ })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /撸空投/ })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /日常关注/ })).toBeInTheDocument();
+  expect(screen.getAllByText('共享名单').length).toBeGreaterThan(0);
+  expect(screen.getAllByText('未配置 XAPI_KEY').length).toBeGreaterThan(0);
+  expect(screen.getByText('同步失败')).toBeInTheDocument();
+  expect(screen.getAllByText('未同步推文').length).toBeGreaterThan(0);
+  await userEvent.click(screen.getByRole('button', { name: /^MEME/ }));
+  expect(screen.queryByRole('button', { name: /^daily_one/ })).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /^meme_one/ })).toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: '从共享名单同步' }));
+  await waitFor(() => expect(onchainApi.syncSharedKols).toHaveBeenCalled());
+  expect(await screen.findByText(/新增 4，更新 1，跳过 2/)).toBeInTheDocument();
 });

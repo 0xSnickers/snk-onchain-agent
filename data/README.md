@@ -36,3 +36,16 @@ npm run import:baw-mints
 - `executor-registry.json`：由 Grok Bot `baw-manage export-snk` 写出，schema `snk-onchain-agent/executor-registry@1`。
 - 导入：`node scripts/import-executor-registry.mjs`（服务需已起；`--dry-run` 可预览）。
 - 每条含 id / walletScope / roles / enabled；本机映射为 `ExecutorSession.role`（FREE_MINT / PAID / MONITOR）。
+
+## 共享 KOL 观察名单
+
+不在本目录。Agent Wallet Manager 写入 Ubuntu 上的 `/home/box/.config/shared/x-mint-bloggers.json`（schema `agent-wallet-manager/x-mint-bloggers@1`）。本应用用 `KOL_SHARED_WATCHLIST_PATH` 只读它，并在 `POST /api/v1/kols/sync-shared` 按 handle upsert，不删除文件外的手工账号，也不采集推文。
+
+| 文件分类 | 标签 | 应用分类 |
+|---|---|---|
+| daily | 日常关注 | DAILY |
+| meme | MEME | MEME |
+| airdrop | 撸空投 | AIRDROP |
+| agent_wallet_mint | Agent Wallet 打新 | AGENT_WALLET_MINT |
+
+文件内 `snkKolHint.categoryMap` 的合法值优先于上表。样例见 [docs/samples/x-mint-bloggers.sample.json](../docs/samples/x-mint-bloggers.sample.json)，说明见 [KOL_SHARED_WATCHLIST.md](../docs/KOL_SHARED_WATCHLIST.md)。

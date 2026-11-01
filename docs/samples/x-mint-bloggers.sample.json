@@ -1,0 +1,57 @@
+{
+  "schema": "agent-wallet-manager/x-mint-bloggers@1",
+  "snkKolHint": {
+    "categoryMap": {
+      "daily": "DAILY",
+      "meme": "MEME",
+      "airdrop": "AIRDROP",
+      "agent_wallet_mint": "AGENT_WALLET_MINT"
+    }
+  },
+  "categories": {
+    "daily": {
+      "label": "日常关注",
+      "accounts": [
+        {
+          "handle": "example_daily",
+          "xUrl": "https://x.com/example_daily",
+          "notes": "",
+          "projects": []
+        }
+      ]
+    },
+    "meme": {
+      "label": "MEME",
+      "accounts": [
+        {
+          "handle": "example_meme",
+          "xUrl": "https://x.com/example_meme",
+          "notes": "",
+          "projects": []
+        }
+      ]
+    },
+    "airdrop": {
+      "label": "撸空投",
+      "accounts": [
+        {
+          "handle": "example_airdrop",
+          "xUrl": "https://x.com/example_airdrop",
+          "notes": "",
+          "projects": []
+        }
+      ]
+    },
+    "agent_wallet_mint": {
+      "label": "Agent Wallet 打新",
+      "accounts": [
+        {
+          "handle": "example_mint",
+          "xUrl": "https://x.com/example_mint",
+          "notes": "",
+          "projects": []
+        }
+      ]
+    }
+  }
+}
