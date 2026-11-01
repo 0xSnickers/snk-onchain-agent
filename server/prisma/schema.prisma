@@ -18,6 +18,11 @@ model Kol {
   nextCursor String?
   posts KolPost[]
   note String @default("")
+  profileUrl String?
+  projects String[] @default([])
+  summary String @default("")
+  sharedAt DateTime?
+  entries KolSharedEntry[]
   createdAt DateTime @default(now())
 }
 
@@ -148,6 +153,52 @@ model WalletActivity {
   fetchedAt DateTime @default(now())
   @@unique([walletScope, chainId, txHash])
   @@index([walletScope, txTime, id])
+}
+
+model KolSharedReport {
+  id String @id @default(uuid())
+  contentHash String @unique
+  schemaName String
+  reportDate String
+  generatedAt DateTime?
+  fileUpdatedAt DateTime?
+  summary String @default("")
+  version String?
+  owner String?
+  ingestedAt DateTime @default(now())
+  sections KolSharedSection[]
+  entries KolSharedEntry[]
+  @@index([reportDate, ingestedAt])
+}
+
+model KolSharedSection {
+  id String @id @default(uuid())
+  reportId String
+  report KolSharedReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  category String
+  label String @default("")
+  summary String @default("")
+  highlights String[] @default([])
+  actions String[] @default([])
+  @@unique([reportId, category])
+}
+
+model KolSharedEntry {
+  id String @id @default(uuid())
+  reportId String
+  report KolSharedReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  kolId String?
+  kol Kol? @relation(fields: [kolId], references: [id], onDelete: SetNull)
+  handle String
+  category String
+  note String @default("")
+  summary String @default("")
+  profileUrl String?
+  projects String[] @default([])
+  tweetUrls String[] @default([])
+  reportedAt DateTime?
+  @@unique([reportId, handle])
+  @@index([handle])
 }
 
 model KolPost {

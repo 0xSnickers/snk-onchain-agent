@@ -79,17 +79,16 @@ export function KolTimeline({
         )}
       </div>
       {!configured && (
-        <div className="kol-xapi-missing">
-          <strong>{t('social.keyMissingTitle')}</strong>
-          <p>{t('social.keyMissing')}</p>
-        </div>
+        <p className="kol-xapi-flag" role="status">
+          {t('social.xOptional')}
+        </p>
       )}
       <div className="agent-toolbar">
         <Button
           variant="outline"
           aria-label={t('social.sync')}
           title={t('social.manualHint')}
-          disabled={!configured || sync.isPending}
+          disabled={sync.isPending}
           onClick={() => sync.mutate({ id: active.id })}
         >
           {sync.isPending ? t('onchain.loading') : t('social.syncShort')}
@@ -97,13 +96,18 @@ export function KolTimeline({
         {timeline.data?.nextCursor && (
           <Button
             variant="outline"
-            disabled={!configured || sync.isPending}
+            disabled={sync.isPending}
             onClick={() => sync.mutate({ id: active.id, more: true })}
           >
             {t('social.more')}
           </Button>
         )}
       </div>
+      {sync.data?.skipped && (
+        <p className="kol-xapi-flag" role="status">
+          {t('social.xOptional')}
+        </p>
+      )}
       {(timeline.error || sync.error || timeline.data?.error) && (
         <p className="error-message" role="alert">
           {timeline.error || sync.error

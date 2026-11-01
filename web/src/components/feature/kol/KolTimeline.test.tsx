@@ -30,7 +30,7 @@ it('only fetches local posts on mount and requires explicit sync for xapi calls'
       </QueryClientProvider>
     </I18nextProvider>,
   );
-  expect(await screen.findByText('尚无采集记录，请配置后手动同步。')).toBeInTheDocument();
+  expect(await screen.findByText('没有已保存的原始推文。实时拉取是可选项。')).toBeInTheDocument();
   expect(onchainApi.syncKol).not.toHaveBeenCalled();
   await userEvent.click(screen.getByRole('button', { name: '同步最新推文' }));
   expect(await screen.findByRole('alert')).toHaveTextContent('Upstream unavailable');

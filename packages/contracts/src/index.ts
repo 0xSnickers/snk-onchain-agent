@@ -27,7 +27,9 @@ export interface MarketResult { source: string; fetchedAt: string; query: string
 export interface Kol {
   id: string; handle: string; displayName?: string | null; avatarUrl?: string | null;
   category?: import('./kol').KolCategory; source?: import('./kol').KolSource;
-  lastSyncedAt?: string | null; syncError?: string | null; note: string; createdAt: string;
+  lastSyncedAt?: string | null; syncError?: string | null; note: string;
+  profileUrl?: string | null; projects?: string[]; summary?: string; sharedAt?: string | null;
+  createdAt: string;
 }
 export interface KolResult { accounts: Kol[]; x: { configured: boolean; state: string } }
 

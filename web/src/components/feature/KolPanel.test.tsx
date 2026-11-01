@@ -13,6 +13,7 @@ vi.mock('@/services/api/onchainApi', () => ({
     kolPosts: vi.fn(),
     syncKol: vi.fn(),
     syncSharedKols: vi.fn(),
+    kolReports: vi.fn(),
     updateKol: vi.fn(),
   },
 }));
@@ -30,6 +31,7 @@ function renderPanel() {
 beforeEach(async () => {
   vi.resetAllMocks();
   await i18n.changeLanguage('zh-CN');
+  vi.mocked(onchainApi.kolReports).mockResolvedValue({ days: [] });
   vi.mocked(onchainApi.kolPosts).mockResolvedValue({
     source: 'xapi.to',
     kolId: 'id',
@@ -97,10 +99,12 @@ it('shows nicknames and selects the matching timeline directly from the mini wat
     error: null,
   }));
   renderPanel();
-  expect(await screen.findByRole('heading', { name: '第一个昵称' })).toBeInTheDocument();
-  await userEvent.click(screen.getByRole('button', { name: /第二个昵称/ }));
-  expect(await screen.findByRole('heading', { name: '第二个昵称' })).toBeInTheDocument();
-  await waitFor(() => expect(onchainApi.kolPosts).toHaveBeenCalledWith('second'));
+  expect(
+    await screen.findByRole('button', { name: /第一个昵称/, pressed: true }),
+  ).toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: /第二个昵称/, pressed: false }));
+  expect(screen.getByRole('button', { name: /第二个昵称/, pressed: true })).toBeInTheDocument();
+  expect(onchainApi.kolPosts).not.toHaveBeenCalled();
   expect(onchainApi.syncKol).not.toHaveBeenCalled();
 });
 it('edits account category without a research-note field', async () => {
@@ -190,6 +194,7 @@ it('paginates cached posts by ten and resets on account switch', async () => {
     })),
   }));
   renderPanel();
+  await userEvent.click(await screen.findByText('原始推文（可选）'));
   expect(await screen.findByText('first tweet 1')).toBeInTheDocument();
   expect(screen.getAllByRole('article')).toHaveLength(10);
   expect(screen.queryByText('first tweet 11')).not.toBeInTheDocument();
@@ -251,13 +256,18 @@ it('shows four watch groups, shared source, and syncs the shared list', async ()
     updated: 1,
     skipped: 2,
     categories: { DAILY: 1, MEME: 1, AIRDROP: 1, AGENT_WALLET_MINT: 1 },
+    report: { id: 'report-1', ingested: true, reportDate: '2026-11-01', entries: 4 },
   });
   renderPanel();
-  expect(await screen.findByRole('heading', { name: /Agent Wallet 打新/ })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /撸空投/ })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /日常关注/ })).toBeInTheDocument();
+  expect(
+    (await screen.findAllByRole('heading', { name: /Agent Wallet 打新/ })).length,
+  ).toBeGreaterThan(0);
+  expect(screen.getAllByRole('heading', { name: /撸空投/ }).length).toBeGreaterThan(0);
+  expect(screen.getAllByRole('heading', { name: /日常关注/ }).length).toBeGreaterThan(0);
   expect(screen.getAllByText('共享名单').length).toBeGreaterThan(0);
-  expect(screen.getAllByText('未配置 XAPI_KEY').length).toBeGreaterThan(0);
+  expect(screen.getByRole('heading', { name: '当前名单' })).toBeInTheDocument();
+  expect(screen.queryByText('未配置 XAPI_KEY')).not.toBeInTheDocument();
+  expect(screen.queryByText(/请在服务端 .env 设置 XAPI_KEY/)).not.toBeInTheDocument();
   expect(screen.getByText('同步失败')).toBeInTheDocument();
   expect(screen.getAllByText('未同步推文').length).toBeGreaterThan(0);
   await userEvent.click(screen.getByRole('button', { name: /^MEME/ }));
@@ -266,4 +276,90 @@ it('shows four watch groups, shared source, and syncs the shared list', async ()
   await userEvent.click(screen.getByRole('button', { name: '从共享名单同步' }));
   await waitFor(() => expect(onchainApi.syncSharedKols).toHaveBeenCalled());
   expect(await screen.findByText(/新增 4，更新 1，跳过 2/)).toBeInTheDocument();
+});
+it('renders a stored digest by Shanghai date and hides raw posts', async () => {
+  vi.mocked(onchainApi.kols).mockResolvedValue({
+    accounts: [
+      {
+        id: 'daily',
+        handle: 'daily_one',
+        displayName: '日报账号',
+        category: 'DAILY',
+        source: 'SHARED',
+        note: '备注',
+        createdAt: '',
+      },
+    ],
+    x: { configured: false, state: 'OPTIONAL' },
+  });
+  vi.mocked(onchainApi.kolReports).mockResolvedValue({
+    days: [
+      {
+        reportDate: '2026-10-31',
+        earlierCount: 0,
+        latest: {
+          id: 'older',
+          ingestedAt: '2026-10-31T02:00:00.000Z',
+          generatedAt: null,
+          summary: '昨天的总结',
+          sections: [],
+        },
+        earlier: [],
+      },
+      {
+        reportDate: '2026-11-01',
+        earlierCount: 1,
+        latest: {
+          id: 'latest',
+          ingestedAt: '2026-11-01T02:00:00.000Z',
+          generatedAt: '2026-11-01T01:00:00.000Z',
+          summary: '今日总结正文',
+          sections: [
+            {
+              category: 'DAILY',
+              label: '日常关注',
+              summary: '',
+              highlights: ['要点一'],
+              actions: ['去核对'],
+              accounts: [
+                {
+                  handle: 'daily_one',
+                  note: '账号备注正文',
+                  summary: '',
+                  profileUrl: 'https://x.com/daily_one',
+                  projects: ['alpha'],
+                  tweetUrls: ['https://x.com/daily_one/status/99'],
+                },
+              ],
+            },
+          ],
+        },
+        earlier: [
+          {
+            id: 'same-day-old',
+            ingestedAt: '2026-11-01T00:00:00.000Z',
+            generatedAt: null,
+            summary: '同日早些时候',
+            sections: [],
+          },
+        ],
+      },
+    ],
+  });
+  renderPanel();
+  expect(
+    await screen.findByRole('tab', { name: '2026年11月1日', selected: true }),
+  ).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /每日总结/ })).toBeInTheDocument();
+  expect(screen.getByText('今日总结正文')).toBeInTheDocument();
+  expect(screen.getByText('要点一')).toBeInTheDocument();
+  expect(screen.getByText('去核对')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: '可执行备注' })).toBeInTheDocument();
+  expect(screen.getByText('账号备注正文')).toBeInTheDocument();
+  expect(screen.queryByRole('article', { name: /tweet/ })).not.toBeInTheDocument();
+  expect(screen.queryByText('first tweet 1')).not.toBeInTheDocument();
+  expect(onchainApi.kolPosts).not.toHaveBeenCalled();
+  await userEvent.click(screen.getByRole('tab', { name: '2026年10月31日' }));
+  expect(screen.getByText('昨天的总结')).toBeInTheDocument();
+  expect(screen.queryByText('今日总结正文')).not.toBeInTheDocument();
 });

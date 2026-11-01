@@ -26,6 +26,10 @@ export class KolController {
   @Get() list() {
     return this.kol.list();
   }
+  @Get("reports")
+  reports() {
+    return this.shared.reports();
+  }
   @Post() add(@Body() input: CreateKol) {
     return this.kol.add(input);
   }

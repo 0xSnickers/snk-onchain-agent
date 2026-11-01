@@ -3,7 +3,6 @@ import { Prisma } from "@prisma/client";
 import { PrismaService } from "../../prisma/prisma.service";
 import { AppError } from "../../common/http";
 import { CreateKol, UpdateKol } from "./kol.dto";
-import type { SharedKolWrite } from "./shared-watchlist";
 const publicFields = {
   id: true,
   handle: true,
@@ -14,6 +13,10 @@ const publicFields = {
   lastSyncedAt: true,
   syncError: true,
   note: true,
+  profileUrl: true,
+  projects: true,
+  summary: true,
+  sharedAt: true,
   createdAt: true,
 } as const;
 type PostInput = {
@@ -37,29 +40,17 @@ export class KolRepository {
   }
   listSyncState() {
     return this.prisma.kol.findMany({
-      select: { handle: true, category: true, note: true, source: true },
+      select: {
+        handle: true,
+        category: true,
+        note: true,
+        source: true,
+        profileUrl: true,
+        projects: true,
+        summary: true,
+        sharedAt: true,
+      },
     });
-  }
-  applyShared(writes: SharedKolWrite[]) {
-    if (!writes.length) return Promise.resolve();
-    return this.prisma.$transaction(
-      writes.map((row) =>
-        this.prisma.kol.upsert({
-          where: { handle: row.handle },
-          create: {
-            handle: row.handle,
-            category: row.category,
-            note: row.note,
-            source: "SHARED",
-          },
-          update: {
-            category: row.category,
-            note: row.note,
-            source: "SHARED",
-          },
-        }),
-      ),
-    );
   }
   add(input: CreateKol) {
     return this.prisma.kol.upsert({
@@ -111,6 +102,10 @@ export class KolRepository {
                 lastSyncedAt: null,
                 nextCursor: null,
                 syncError: null,
+                profileUrl: null,
+                projects: [],
+                summary: "",
+                sharedAt: null,
               }
             : {}),
         },

@@ -10,7 +10,7 @@
 | GET /wallet/overview | — | 409 `WALLET_DELEGATED`。不读取 baw 会话 |
 | GET /wallet/holdings | — | 账本地址的 BSC 链上余额：原生 BNB（可带 DexScreener 美元价）和账本合约的 `balanceOf`。零余额不返回。NFT 的 `valueUsd` 为 null。部分合约失败放在 `failures`，不把列表伪装成完整。若存在 `data/nft-holders-result.json`，按合约地址附上持有者人数、confidence 和快照时间；文件缺失或无法解析时这些字段为 null，不影响余额。 |
 | GET /market/pairs | q: 1–80 字符，默认 BNB；chain 默认 bsc | `{ source, fetchedAt, query, chain, pairs }` |
-| GET /kols | — | `{ accounts: Kol[], x: { configured, state: "READY" | "NOT_CONFIGURED" } }` |
+| GET /kols | — | `{ accounts: Kol[], x: { configured, state: "READY" | "OPTIONAL" } }`。`OPTIONAL` 表示未配置 XAPI_KEY，列表和日报仍可用 |
 | POST /kols | `{ handle, note? }` | Kol；相同 handle 更新备注，大小写不敏感 |
 | DELETE /kols/:id | UUID | `{ removed: true }`，幂等 |
 
@@ -117,9 +117,15 @@ xapi.to Action 网关认证使用官方 CLI 对应的 `XAPI-Key` 头。网关可
 | airdrop | AIRDROP |
 | agent_wallet_mint | AGENT_WALLET_MINT |
 
-账号对象为 `{ handle, xUrl, notes, projects[] }`。handle 可带或不带 `@`，入库为小写且不含 `@`。按 handle 大小写不敏感 upsert：缺失则创建，已存在则更新 category、note 和 `source=SHARED`。不删除文件里没有的账号，不改昵称、头像、推文或 xapi 检查点，也不调用 xapi。`projects` 不入库。Agent Wallet Manager 拥有该 JSON 的写入；本接口只读。
+账号对象为 `{ handle, xUrl, notes, projects[] }`。文件若另有这些字段，一并入库，没有则留空，不编造：顶层 `dailySummary` / `summary` / `digest`、`reportDate` 或 `date`（`YYYY-MM-DD`）、`generatedAt`、`updatedAt`；分类上的 `label`、`summary`、`highlights[]`、`actions[]` / `actionableNotes[]`；账号上的 `summary` / `highlight`、`tweetUrl` / `tweetUrls` / `statusUrl` / `postUrl`、`posts[].url`，以及 `projects` 里的 `https://x.com|twitter.com/{handle}/status/{id}`。handle 可带或不带 `@`，入库为小写且不含 `@`。按 handle 大小写不敏感 upsert 当前行：缺失则创建，已存在则更新 category、note、profileUrl、projects、账号 summary 和 `source=SHARED`。不删除文件里没有的账号，不改昵称、头像、已采集推文或 xapi 检查点，也不调用 xapi。
 
-成功 201，data 为 `{ created, updated, skipped, categories }`。`categories` 是四个应用分类下、文件中有效且唯一的账号数。`skipped` 包含非法 handle、与 xUrl 冲突、未知分类、文件内重复项，以及分类/备注/来源已一致的行。文件缺失、不是普通文件或不可读：409 `SHARED_WATCHLIST_UNAVAILABLE`。JSON 非法、schema 不符或超过 500 条：409 `SHARED_WATCHLIST_INVALID`。不以空名单伪装成功。推文采集仍是按账号的手动同步。
+每次内容哈希变化都会新增一份快照（`KolSharedReport` + 分类段 + 账号行），旧快照保留。相同哈希只补当前行，不复制快照。`reportDate` 是 Asia/Shanghai 日历日：优先文件里的 `reportDate`/`date`，否则用 `generatedAt` 或 `updatedAt` 换算，都没有时用本次入库时刻。账号从文件消失不会抹掉已入库快照。
+
+成功 201，data 为 `{ created, updated, skipped, categories, report }`。`report` 为 `{ id, ingested, reportDate, entries }`。`categories` 是四个应用分类下、文件中有效且唯一的账号数。`skipped` 包含非法 handle、与 xUrl 冲突、未知分类、文件内重复项，以及当前行已与文件一致的账号。文件缺失、不是普通文件或不可读：409 `SHARED_WATCHLIST_UNAVAILABLE`。JSON 非法、schema 不符或超过 500 条：409 `SHARED_WATCHLIST_INVALID`。不以空名单伪装成功。
+
+`GET /kols/reports` 只读数据库，按 `reportDate` 倒序最多 30 个上海日。每天 `latest` 是该日最晚入库的快照，`earlier` 最多 5 份更早快照，`earlierCount` 是该日更早快照总数。快照含 `summary`（每日总结）和 `sections[]`（分类、要点 highlights、可执行备注 actions、账号 note / 出处链接）。不调用 xapi。
+
+`POST /kols/:id/sync` 仍是可选的实时推文拉取。`XAPI_KEY` 未设置或只有空白时返回 200 `{ source:"xapi.to", imported:0, skipped:true, reason:"XAPI_OPTIONAL" }`，不写 `syncError`，不请求上游。配置了 key 之后的错误码不变。观察页不要求先配置该 key。
 
 ### 头像与代币图片
 

@@ -60,6 +60,7 @@ it("reports missing configuration and malformed upstream rather than empty succe
   });
 });
 it("persists success, follows saved cursor and prevents repeated paid fetches within cooldown", async () => {
+  process.env.XAPI_KEY = "fixture-only-key";
   const repo = {
     find: jest.fn(async () => ({
       id: "fixture",
@@ -97,6 +98,7 @@ it("persists success, follows saved cursor and prevents repeated paid fetches wi
   expect(xapi.tweets).toHaveBeenCalledTimes(1);
 });
 it("keeps stored posts and records upstream failures", async () => {
+  process.env.XAPI_KEY = "fixture-only-key";
   const repo = {
     find: jest.fn(async () => ({
       handle: "test",
@@ -155,6 +157,7 @@ it("uses the official XAPI-Key header and handles HTTP-200 action errors explici
 });
 
 it("fills a missing nickname from the real profile and binds it to the existing user ID", async () => {
+  process.env.XAPI_KEY = "fixture-only-key";
   const repo = {
     find: jest.fn(async () => ({
       handle: "test",
@@ -184,6 +187,7 @@ it("fills a missing nickname from the real profile and binds it to the existing 
   );
 });
 it("rejects a reassigned handle instead of replacing the monitored identity", async () => {
+  process.env.XAPI_KEY = "fixture-only-key";
   const repo = {
     find: jest.fn(async () => ({
       handle: "test",
@@ -208,5 +212,27 @@ it("rejects a reassigned handle instead of replacing the monitored identity", as
     code: "KOL_IDENTITY_CHANGED",
   });
   expect(xapi.tweets).not.toHaveBeenCalled();
+  expect(repo.savePosts).not.toHaveBeenCalled();
+});
+
+it("skips live fetch without recording a failure when XAPI_KEY is empty", async () => {
+  process.env.XAPI_KEY = " ";
+  const repo = {
+    find: jest.fn(async () => ({ id: "fixture", handle: "test" })),
+    syncFailed: jest.fn(),
+    savePosts: jest.fn(),
+  };
+  const xapi = { profile: jest.fn(), tweets: jest.fn() };
+  const service = new KolSyncService(
+    repo as unknown as KolRepository,
+    xapi as unknown as XapiProvider,
+  );
+  await expect(service.sync("fixture")).resolves.toMatchObject({
+    imported: 0,
+    skipped: true,
+    reason: "XAPI_OPTIONAL",
+  });
+  expect(xapi.tweets).not.toHaveBeenCalled();
+  expect(repo.syncFailed).not.toHaveBeenCalled();
   expect(repo.savePosts).not.toHaveBeenCalled();
 });

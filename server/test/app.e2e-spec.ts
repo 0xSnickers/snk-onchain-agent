@@ -13,28 +13,41 @@ describe("Local API contract", () => {
   const id = "8277dd94-6876-4044-a962-e4ac9592a575";
   const prisma = {
     $queryRaw: jest.fn().mockResolvedValue([1]),
-    $transaction: jest.fn(async (ops: Promise<unknown>[]) => Promise.all(ops)),
+    $transaction: jest.fn(),
     kol: {
       findMany: jest.fn().mockResolvedValue([]),
-      upsert: jest.fn().mockResolvedValue({ id, handle: "example", note: "" }),
+      upsert: jest.fn(async (args: { where: { handle: string } }) => ({
+        id,
+        handle: args.where.handle,
+        note: "",
+      })),
       deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
     },
+    kolSharedReport: {
+      findUnique: jest.fn().mockResolvedValue(null),
+      create: jest.fn(async () => ({ id: "report-1" })),
+    },
+    kolSharedSection: { createMany: jest.fn().mockResolvedValue({ count: 0 }) },
+    kolSharedEntry: { createMany: jest.fn().mockResolvedValue({ count: 0 }) },
   };
   const baw = { run: jest.fn() };
+  prisma.$transaction.mockImplementation(async (arg: unknown) => {
+    if (typeof arg === "function")
+      return (arg as (db: typeof prisma) => Promise<unknown>)(prisma);
+    return Promise.all(arg as Promise<unknown>[]);
+  });
   beforeAll(async () => {
     const module = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(AgentLaunchService)
       .useValue({
-        list: jest
-          .fn()
-          .mockResolvedValue({
-            chain: "bsc",
-            scope: "AGENT_LAUNCHPADS",
-            coverage: "BOUNDED_SAMPLE",
-            fetchedAt: "2026-10-28T00:00:00Z",
-            tokens: [],
-            sources: [],
-          }),
+        list: jest.fn().mockResolvedValue({
+          chain: "bsc",
+          scope: "AGENT_LAUNCHPADS",
+          coverage: "BOUNDED_SAMPLE",
+          fetchedAt: "2026-10-28T00:00:00Z",
+          tokens: [],
+          sources: [],
+        }),
       })
       .overrideProvider(PrismaService)
       .useValue(prisma)
@@ -198,6 +211,10 @@ describe("Local API contract", () => {
         category: "MEME",
         note: "",
         source: "SHARED",
+        profileUrl: "https://x.com/meme_one",
+        projects: [],
+        summary: "",
+        sharedAt: null,
       },
       {
         handle: "kept_manual",
@@ -218,10 +235,15 @@ describe("Local API contract", () => {
         updated: 1,
         skipped: 5,
         categories: { DAILY: 1, MEME: 1, AIRDROP: 1, AGENT_WALLET_MINT: 2 },
+        report: { ingested: true, entries: 5 },
       });
-      const writes = prisma.kol.upsert.mock.calls.map(
-        (args: [{ where: { handle: string }; update: object }]) => args[0],
+      expect(response.body.data.report.reportDate).toMatch(
+        /^\d{4}-\d{2}-\d{2}$/,
       );
+      const writes = prisma.kol.upsert.mock.calls.map((args) => args[0]) as {
+        where: { handle: string };
+        update: object;
+      }[];
       expect(writes.map((row) => row.where.handle)).toEqual([
         "daily_one",
         "drop_one",
@@ -232,6 +254,10 @@ describe("Local API contract", () => {
         category: "DAILY",
         note: "fixture daily updated",
         source: "SHARED",
+        profileUrl: "https://x.com/daily_one",
+        projects: [],
+        summary: "",
+        sharedAt: null,
       });
       process.env.KOL_SHARED_WATCHLIST_PATH =
         "/tmp/snk-missing-shared-watchlist.json";

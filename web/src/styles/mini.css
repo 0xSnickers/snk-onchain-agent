@@ -786,6 +786,83 @@ textarea {
   color: var(--color-muted-foreground);
   font-size: 11px;
 }
+.kol-report {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.kol-report-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.kol-day {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.kol-day h2 {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  font-size: 16px;
+}
+.kol-day h2 span,
+.kol-day h4,
+.kol-section-summary,
+.kol-report-account small {
+  color: var(--color-muted-foreground);
+  font-weight: 500;
+}
+.kol-day-summary,
+.kol-section-summary {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.kol-report-section {
+  margin-top: 16px;
+}
+.kol-report-section h3,
+.kol-report-section h4 {
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+.kol-report-section ul {
+  margin: 0 0 8px;
+  padding-left: 18px;
+}
+.kol-report-account {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 8px;
+  padding: 8px 0;
+  border-top: 1px solid var(--color-border);
+}
+.kol-report-account.is-selected {
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}
+.kol-report-account button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+.kol-report-account p {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+.kol-raw-posts,
+.kol-earlier {
+  margin-top: 4px;
+}
 @media (max-width: 800px) {
   .kol-workspace .kol-watchlist {
     position: static;

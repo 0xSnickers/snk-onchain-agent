@@ -3,7 +3,7 @@ import { NetworkService } from "../../common/network.service";
 import { AppError } from "../../common/http";
 import { imageUrl } from "../../common/image-url";
 type Data = Record<string, unknown>;
-export const xapiConfigured = () => Boolean(process.env.XAPI_KEY);
+export const xapiConfigured = () => Boolean(process.env.XAPI_KEY?.trim());
 const count = (v: unknown) =>
   typeof v === "number" && Number.isInteger(v) && v >= 0 && v <= 2147483647
     ? v
@@ -15,11 +15,11 @@ export class XapiProvider {
     action: "twitter.user_by_screen_name" | "twitter.user_tweets",
     input: Record<string, string>,
   ) {
-    const key = process.env.XAPI_KEY;
+    const key = process.env.XAPI_KEY?.trim();
     if (!key)
       throw new AppError(
         "XAPI_NOT_CONFIGURED",
-        "Set XAPI_KEY in server/.env to enable KOL sync",
+        "Live post fetch is optional and XAPI_KEY is not set",
         409,
       );
     const result = await this.network.json<{

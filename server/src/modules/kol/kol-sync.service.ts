@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { AppError } from "../../common/http";
 import { KolRepository } from "./kol.repository";
-import { XapiProvider } from "./xapi.provider";
+import { XapiProvider, xapiConfigured } from "./xapi.provider";
 @Injectable()
 export class KolSyncService {
   private pending = new Set<string>();
@@ -23,6 +23,17 @@ export class KolSyncService {
     };
   }
   async sync(id: string, more = false) {
+    if (!xapiConfigured()) {
+      const kol = await this.repository.find(id);
+      if (!kol) throw new AppError("KOL_NOT_FOUND", "KOL not found", 404);
+      return {
+        source: "xapi.to" as const,
+        imported: 0,
+        fetchedAt: new Date().toISOString(),
+        skipped: true,
+        reason: "XAPI_OPTIONAL",
+      };
+    }
     if (this.pending.has(id))
       throw new AppError("KOL_SYNC_BUSY", "KOL sync is already running", 409);
     if ((this.cooldown.get(id) || 0) > Date.now())

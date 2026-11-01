@@ -39,7 +39,7 @@ npm run import:baw-mints
 
 ## 共享 KOL 观察名单
 
-不在本目录。Agent Wallet Manager 写入 Ubuntu 上的 `/home/box/.config/shared/x-mint-bloggers.json`（schema `agent-wallet-manager/x-mint-bloggers@1`）。本应用用 `KOL_SHARED_WATCHLIST_PATH` 只读它，并在 `POST /api/v1/kols/sync-shared` 按 handle upsert，不删除文件外的手工账号，也不采集推文。
+不在本目录。Agent Wallet Manager 写入 Ubuntu 上的 `/home/box/.config/shared/x-mint-bloggers.json`（schema `agent-wallet-manager/x-mint-bloggers@1`）。本应用用 `KOL_SHARED_WATCHLIST_PATH` 只读它。`POST /api/v1/kols/sync-shared` 把账号、备注、链接和日报快照写入数据库，并保留每次内容变化；不删除文件外的手工账号，也不采集推文。观察页按上海日期读这些快照。
 
 | 文件分类 | 标签 | 应用分类 |
 |---|---|---|

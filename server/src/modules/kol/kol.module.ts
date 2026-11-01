@@ -6,12 +6,14 @@ import { Module } from "@nestjs/common";
 import { KolController } from "./kol.controller";
 import { KolService } from "./kol.service";
 import { KolRepository } from "./kol.repository";
+import { KolReportRepository } from "./kol-report.repository";
 import { PrismaService } from "../../prisma/prisma.service";
 @Module({
   controllers: [KolController],
   providers: [
     KolService,
     KolRepository,
+    KolReportRepository,
     PrismaService,
     KolSyncService,
     KolSharedSyncService,

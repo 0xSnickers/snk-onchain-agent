@@ -1,8 +1,14 @@
 import { AppError } from "../../common/http";
 import { KOL_CATEGORIES, type KolCategoryName } from "./kol-categories";
+import {
+  readAccountExtras,
+  readBucketMeta,
+  readFileMeta,
+  rememberSection,
+  type SharedFileMeta,
+} from "./shared-report-fields";
 
-export const SHARED_WATCHLIST_SCHEMA =
-  "agent-wallet-manager/x-mint-bloggers@1";
+export const SHARED_WATCHLIST_SCHEMA = "agent-wallet-manager/x-mint-bloggers@1";
 export const DEFAULT_SHARED_WATCHLIST_PATH =
   "/home/box/.config/shared/x-mint-bloggers.json";
 
@@ -18,6 +24,14 @@ const SKIP_TOP_LEVEL = new Set([
   "version",
   "owner",
   "generatedAt",
+  "reportDate",
+  "date",
+  "summary",
+  "digest",
+  "dailySummary",
+  "highlights",
+  "actions",
+  "actionableNotes",
 ]);
 
 export const DEFAULT_CATEGORY_MAP: Record<string, KolCategoryName> = {
@@ -31,24 +45,26 @@ export interface ParsedSharedAccount {
   handle: string;
   category: KolCategoryName;
   note: string;
+  profileUrl: string | null;
+  projects: string[];
+  summary: string;
+  tweetUrls: string[];
+  reportedAt: string | null;
+}
+
+export interface ParsedSharedSection {
+  category: KolCategoryName;
+  label: string;
+  summary: string;
+  highlights: string[];
+  actions: string[];
 }
 
 export interface ParsedSharedWatchlist {
   accounts: ParsedSharedAccount[];
+  sections: ParsedSharedSection[];
   skipped: number;
-}
-
-export interface SharedKolState {
-  handle: string;
-  category: string;
-  note: string;
-  source: string | null;
-}
-
-export interface SharedKolWrite {
-  handle: string;
-  category: KolCategoryName;
-  note: string;
+  meta: SharedFileMeta;
 }
 
 export function sharedWatchlistPath() {
@@ -65,9 +81,12 @@ export function parseSharedWatchlist(doc: unknown): ParsedSharedWatchlist {
     );
   const map = categoryMap(doc);
   const byHandle = new Map<string, ParsedSharedAccount>();
+  const sections = new Map<KolCategoryName, ParsedSharedSection>();
   let skipped = 0;
   let seen = 0;
   for (const bucket of collectBuckets(doc, map)) {
+    const category = resolveCategory(bucket.key, map);
+    if (category) rememberSection(sections, category, bucket);
     for (const raw of bucket.entries) {
       seen += 1;
       if (seen > MAX_ACCOUNTS)
@@ -84,47 +103,15 @@ export function parseSharedWatchlist(doc: unknown): ParsedSharedWatchlist {
       const handle = account.handle.toLowerCase();
       if (byHandle.has(handle)) skipped += 1;
       byHandle.set(handle, { ...account, handle });
+      rememberSection(sections, account.category, bucket);
     }
   }
-  return { accounts: [...byHandle.values()], skipped };
-}
-
-export function planSharedSync(
-  parsed: ParsedSharedWatchlist,
-  existing: SharedKolState[],
-) {
-  const current = new Map(
-    existing.map((row) => [row.handle.toLowerCase(), row]),
-  );
-  const categories = emptyCategories();
-  const writes: SharedKolWrite[] = [];
-  let created = 0;
-  let updated = 0;
-  let skipped = parsed.skipped;
-  for (const account of parsed.accounts) {
-    categories[account.category] += 1;
-    const row = current.get(account.handle);
-    if (!row) {
-      created += 1;
-      writes.push(account);
-      continue;
-    }
-    if (
-      row.category === account.category &&
-      row.note === account.note &&
-      row.source === "SHARED"
-    ) {
-      skipped += 1;
-      continue;
-    }
-    updated += 1;
-    writes.push(account);
-  }
-  return { writes, created, updated, skipped, categories };
-}
-
-function emptyCategories(): Record<KolCategoryName, number> {
-  return { DAILY: 0, MEME: 0, AIRDROP: 0, AGENT_WALLET_MINT: 0 };
+  return {
+    accounts: [...byHandle.values()],
+    sections: [...sections.values()],
+    skipped,
+    meta: readFileMeta(doc),
+  };
 }
 
 function categoryMap(doc: Record<string, unknown>) {
@@ -138,6 +125,11 @@ function categoryMap(doc: Record<string, unknown>) {
   return map;
 }
 
+interface Bucket extends ReturnType<typeof readBucketMeta> {
+  key: string;
+  entries: unknown[];
+}
+
 function collectBuckets(
   doc: Record<string, unknown>,
   map: Record<string, KolCategoryName>,
@@ -147,31 +139,35 @@ function collectBuckets(
       return bucketsFrom(doc[key]);
   }
   for (const key of FLAT_KEYS) {
-    if (Array.isArray(doc[key])) return [{ key: "", entries: doc[key] }];
+    if (Array.isArray(doc[key])) return [bucket("", doc[key], null)];
   }
-  const buckets: { key: string; entries: unknown[] }[] = [];
+  const buckets: Bucket[] = [];
   for (const [key, value] of Object.entries(doc)) {
     if (SKIP_TOP_LEVEL.has(key)) continue;
     const entries = entriesOf(value);
     if (!entries || !resolveCategory(key, map)) continue;
-    buckets.push({ key, entries });
+    buckets.push(bucket(key, entries, value));
   }
   return buckets;
 }
 
-function bucketsFrom(value: unknown) {
+function bucket(key: string, entries: unknown[], source: unknown): Bucket {
+  return { key, entries, ...readBucketMeta(source) };
+}
+
+function bucketsFrom(value: unknown): Bucket[] {
   if (Array.isArray(value)) {
     if (value.length > 0 && value.every(isGroup))
       return value.map((item) => {
         const group = item as Record<string, unknown>;
-        return { key: groupKey(group), entries: entriesOf(group) ?? [] };
+        return bucket(groupKey(group), entriesOf(group) ?? [], group);
       });
-    return [{ key: "", entries: value }];
+    return [bucket("", value, null)];
   }
   if (!isRecord(value)) return [];
   return Object.entries(value).flatMap(([key, child]) => {
     const entries = entriesOf(child);
-    return entries ? [{ key, entries }] : [];
+    return entries ? [bucket(key, entries, child)] : [];
   });
 }
 
@@ -219,13 +215,15 @@ function parseAccount(
   if (!category) return null;
   const noteSource = raw.notes ?? raw.note;
   if (noteSource != null && typeof noteSource !== "string") return null;
+  const profileUrl = fromUrl ? `https://x.com/${handle.toLowerCase()}` : null;
   return {
     handle,
     category,
     note: (typeof noteSource === "string" ? noteSource.trim() : "").slice(
       0,
-      500,
+      4000,
     ),
+    ...readAccountExtras(raw, profileUrl),
   };
 }
 
@@ -245,7 +243,9 @@ function handleFromUrl(value: unknown) {
     const url = new URL(value);
     if (url.protocol !== "https:") return null;
     const host = url.hostname.toLowerCase();
-    if (!["x.com", "twitter.com", "www.x.com", "www.twitter.com"].includes(host))
+    if (
+      !["x.com", "twitter.com", "www.x.com", "www.twitter.com"].includes(host)
+    )
       return null;
     const segment = url.pathname.split("/").filter(Boolean)[0] || "";
     let handle = segment;
