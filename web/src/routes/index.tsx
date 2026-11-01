@@ -7,6 +7,7 @@ const Workspace = lazy(() =>
   import('@/pages/WorkspacePage').then((m) => ({ default: m.WorkspacePage })),
 );
 const Agent = lazy(() => import('@/pages/AgentPage').then((m) => ({ default: m.AgentPage })));
+const Sniper = lazy(() => import('@/pages/SniperPage').then((m) => ({ default: m.SniperPage })));
 export function AppRoutes() {
   return (
     <Routes>
@@ -15,6 +16,7 @@ export function AppRoutes() {
         <Route path="activity" element={<Agent />} />
         <Route path="agent/runs" element={<Navigate to="/activity#runs" replace />} />
         <Route path="mint" element={<Navigate to="/activity#mint" replace />} />
+        <Route path="sniper" element={<Sniper />} />
         {(['wallet', 'market', 'kols', 'connections'] as const).map((path) => (
           <Route
             key={path}

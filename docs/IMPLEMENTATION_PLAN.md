@@ -148,3 +148,7 @@ P1：w1/w2角色绑定、120秒心跳/暂停、离线通知、钱包分区查询
 ## v0.5 动态钱包（2026-10-30）
 
 执行端不再限制w1/w2：新增label/role/isDefault及迁移、动态登记/编辑API与看板、角色默认路由、明确付费钱包选择。MONITOR仅监控，连接/暂停与执行权限分开；旧任务不因默认变化或离线而转移。动态CLI及登记文件导入沿用loopback与独立会话边界。数据库锁及唯一约束防默认冲突；未完成/未知任务阻止改角色。共享类型、API契约、组件及隔离数据库smoke同步更新。
+
+## 狙击手（2026-11-01）
+
+对照 [agentid-sniper](https://github.com/nancyc0813-maker/agentid-sniper) 的监视规则，增加 `/sniper`。参考项目在本机扫 BSC 新合约 bytecode 是否引用 Agent ID 登记合约，并用进度、Agent ID 付费钱包数、上限、资金留存和开池状态决定是否用 baw 自动铸造和止盈。本仓库只接 Four.meme `openfour.meme.AgentIdExclusive` 的有界榜单和手动合约的可选 bytecode 核对，不扫全区块、不学别人的 calldata、不自动卖出、不发 Telegram。免费只通知；付费未知项保持观察；总开关默认关闭；确认文案匹配后只记录 USDT 意图，不广播。

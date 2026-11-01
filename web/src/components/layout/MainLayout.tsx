@@ -6,6 +6,7 @@ import {
   Activity,
   ArrowUpRight,
   LayoutDashboard,
+  Crosshair,
   Radio,
   Settings2,
   Users,
@@ -18,6 +19,7 @@ const links = [
   { path: '/wallet', key: 'wallet', icon: Wallet },
   { path: '/activity', key: 'agent.activity', icon: ListChecks },
   { path: '/market', key: 'market', icon: Radio },
+  { path: '/sniper', key: 'sniper', icon: Crosshair },
   { path: '/kols', key: 'kols', icon: Users },
   { path: '/connections', key: 'settings', icon: Settings2 },
 ];
@@ -68,6 +70,10 @@ export function MainLayout() {
             <span className="session-indicator" aria-label={t('onchain.delegated')} />
           </div>
           <div className="topbar-actions">
+            <NavLink className="header-link" to="/sniper" aria-label={t('onchain.sniper')}>
+              <Crosshair size={16} />
+              <span>{t('onchain.sniper')}</span>
+            </NavLink>
             <NavLink className="header-link" to="/activity" aria-label={t('design.activity')}>
               <ListChecks size={16} />
               <span>{t('design.activity')}</span>

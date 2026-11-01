@@ -194,3 +194,20 @@ ExecutorSession、POST/PATCH执行端接口增加可选sourceRoles（最多5个�
 账本读取、账本导入和文件回写去重接受EVM地址checksum大小写；比较前统一规范为 `EVM:` + 小写地址。钱包地址确实不同、零地址或畸形scope仍返回LEDGER_INVALID。行级scope同样规范后按钱包过滤，不混入其他钱包合约。接口、数据库和前端Query key仍使用规范小写scope，兼容逻辑不重写历史交易文件。
 
 动态钱包管理查询独立于默认账本身份/配置加载；默认账本失败时保留明确错误，同时仍可查看、编辑和切换已登记钱包。
+
+## 狙击手（2026-11-01）
+
+对照 agentid-sniper 的监视规则，不移植它的全区块扫描、自动铸造、止盈或 Telegram。名单来自币安公开 Pulse 的 Four.meme `openfour.meme.AgentIdExclusive`（NEW / FINALIZING，最多各 100）。MIGRATED 只用来把已经见过的目标标成已开池。手动合约可选 RPC 只读 `eth_getCode`，核对 bytecode 是否包含登记合约 `0x60b9262456de011f7d15a54cdd8c48baaa8b022f`。公开 `holders` 不是 Agent ID 付费钱包数，不能互相代替。未知的上限、钱包数、资金留存、费用或身份保持观察或跳过，不会当成通过。
+
+`GET /sniper/board`：`SniperBoard`。`broadcast` 恒为 false。`coverage=BOUNDED_SAMPLE`。`controls` 默认未武装，进度 65（允许 60–70）、钱包 115（允许 100–130）、单目标 20 USDT、每日 60 USDT，且单目标不能大于每日。`targets[]` 含状态 `WATCHING/NOTIFY_ONLY/THRESHOLD/ARMED/AWAITING_CONFIRM/CONFIRMED/SKIPPED`、`reasons`、`signals`。进程内 30 秒合并刷新。NEW 与 FINALIZING 都失败时，若库里已有目标则 HTTP 200 且 `refreshError` 不为空，不把名单清空；若没有目标则 HTTP 502 `SNIPER_UPSTREAM_ERROR`。某一阶段失败记在 `sources[]`，不丢弃另一阶段的结果。
+
+| 方法 | 行为 |
+|---|---|
+| PATCH /sniper/controls | 保存总开关和门槛，并按新门槛重算。关闭总开关时，已武装 / 待确认回到门槛态并清掉预览 |
+| POST /sniper/targets | `{contractAddress}`。已存在则返回原行。RPC 缺失时身份为未核实；RPC 失败返回 502/409，不把失败写成“不是 Agent ID” |
+| POST /sniper/targets/:id/arm | 总开关已武装且状态为 THRESHOLD 才变成 ARMED，否则 409 `SNIPER_DISARMED` 或 `SNIPER_NOT_READY` |
+| POST /sniper/targets/:id/disarm | 从 ARMED / AWAITING_CONFIRM 回到 THRESHOLD |
+| POST /sniper/targets/:id/preview | `{amount}` USDT，大于 0 且不超过单目标和当日剩余。状态须为 ARMED。写入 5 分钟预览并变为 AWAITING_CONFIRM |
+| POST /sniper/targets/:id/confirm | `{amount, asset: "USDT", confirmationText}`。文案必须等于 `确认狙击 {amount} USDT`，且与预览金额一致。原子消费后状态 CONFIRMED，意图 `broadcast: false`、`reason: WALLET_DELEGATED`。过期 409 `PREVIEW_EXPIRED`，文案不对 409 `CONFIRM_REQUIRED`，重复消费 409 `CONFIRM_CONSUMED`，超额 409 `DAILY_CAP` |
+
+免费（显式 0 wei）永远是 `NOTIFY_ONLY`，不能武装。已迁移、超过 48 小时、进度已满、资金被转走、或明确没有上限，状态为 `SKIPPED`。确认按 Asia/Shanghai 自然日累计已记录的 USDT 意图。本接口不调用 baw，不报价，不广播。

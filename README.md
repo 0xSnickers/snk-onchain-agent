@@ -25,6 +25,7 @@ npm run dev        # 同时启动前后端，日志写 logs/
 - BNB Agent 专属发射盘：默认三列展示 Flap Agent、Four Agent ID、gang.fun 的内盘新创建/即将发射/已迁移代币；显示真实来源、采样边界、预测合约与来源失败。
 - SOL / BNB Chain 市场：GMGN 1h 活跃代币列表与真实 OHLCV，DEX Screener 名称/合约搜索；TradingView Lightweight Charts 显示蜡烛图、USD 成交量、十字线及多周期。带缓存、合并请求和限流冷却。
 - KOL 观察：共享名单同步进数据库后，按上海日期展示 X日常 日报（每日总结、分类要点、可执行备注）。原始推文收在折叠区，实时拉取可选，不依赖 `XAPI_KEY`。
+- [狙击手](http://127.0.0.1:5173/sniper)：观察 Four.meme Agent ID 专属新盘。进场规则按 agentid-sniper（免费只通知、付费看进度 / Agent ID 钱包数 / 上限 / 资金是否还在、已开池跳过）。未知条件不会当成通过。总开关默认关闭；确认只记录 USDT 意图，本机不广播。
 - 独立数据库与迁移、一键启动、自动化测试、真实数据库 smoke。
 
 X 关注列表导入、定时推文采集、链上历史快照和提醒属于后续阶段；不会把示例 KOL 当成你的真实关注名单。
@@ -83,3 +84,4 @@ npm run smoke          # 服务和数据库运行时：HTTP/数据库检查，�
 - 实时公开推文仍可用 xapi.to：在 `server/.env` 设置 `XAPI_KEY` 后重启，再在「原始推文」里手动同步。未设置时该拉取直接跳过，页面和日报保持可用。不读取私人推文、不发帖、不导入个人关注列表。
 - 共享观察名单默认读取 `/home/box/.config/shared/x-mint-bloggers.json`（可用 `KOL_SHARED_WATCHLIST_PATH` 覆盖）。同步把总结、分类、备注和链接写入数据库；文件之后被覆盖不会删掉已入库日报。见 [docs/KOL_SHARED_WATCHLIST.md](docs/KOL_SHARED_WATCHLIST.md)。
 - 金额、价格、代币数量和百分比统一显示 6 位小数；数量悬浮可看精确源值，表单与广播参数不受显示舍入影响。原始技术日志不重写。
+- 狙击手名单来自币安公开 Pulse（Four.meme `openfour.meme.AgentIdExclusive`），不需要新的 API key。手动合约可用 `SNIPER_BSC_RPC_URL`（否则 `MARKET_BSC_RPC_URL`、`BSC_RPC_URL`）只读检查 bytecode 是否包含 Agent ID 登记合约 `0x60b9262456de011f7d15a54cdd8c48baaa8b022f`。未配置 RPC 时手动项保持未核实，不会被当成专属盘。

@@ -8,7 +8,7 @@ import { AgentLaunchService } from "./agent-launch.service";
 import { LaunchHttpProvider } from "./launch-http.provider";
 import { FlapAgentProvider } from "./flap-agent.provider";
 @Module({
-  exports: [AgentLaunchService],
+  exports: [AgentLaunchService, LaunchHttpProvider],
   controllers: [MarketController],
   providers: [
     AgentLaunchService,
